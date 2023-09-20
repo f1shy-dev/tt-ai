@@ -118,6 +118,6 @@ example:
     with open(f"./workspace/{video_id}/gen_final/analysis.json", "w", encoding="utf-8") as json:
         json.write(response["choices"][0]["message"]["content"])
 
-if __name__ == "__main__":
-    video_id = download_and_transcribe()
-    analyse_with_chatgpt(video_id)
+# if __name__ == "__main__":
+#     video_id = download_and_transcribe()
+#     analyse_with_chatgpt(video_id)
