@@ -8,8 +8,8 @@ from .utils import write_srt, write_compact_srt
 #####################
 #     Variables     #
 
-DEVICE = "cuda" # or "cpu" or "mps" for mac
-MODEL = "tiny"
+DEVICE = os.environ.get("WHISPER_DEVICE", "cuda") # or "cpu" or "mps" for mac
+MODEL = os.environ.get("WHISPER_MODEL", "small.en") # or "medium.en" or "large.en"
 
 #####################
 
