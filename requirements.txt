@@ -1,1 +1,3 @@
 openai-whisper
+yt_dlp
+ffmpeg
