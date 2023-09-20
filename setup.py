@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    version="1.2",
+    version="1.9",
     name="meow",
     packages=find_packages(),
     py_modules=["meow_ttai"],
