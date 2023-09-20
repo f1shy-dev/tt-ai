@@ -5,6 +5,7 @@ import subprocess
 import yt_dlp
 import whisper
 import ffmpeg
+import json
 from .utils import write_srt, write_compact_srt
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
@@ -118,6 +119,56 @@ example:
     with open(f"./workspace/{video_id}/gen_final/analysis.json", "w", encoding="utf-8") as json:
         json.write(response["choices"][0]["message"]["content"])
 
-# if __name__ == "__main__":
-#     video_id = download_and_transcribe()
-#     analyse_with_chatgpt(video_id)
+
+def seperate_into_clips(video_id):
+    # analysis json example
+#     [
+#   {
+#     "start": "0:00:09.560",
+#     "end": "0:00:27.920",
+#     "summary": "The effects of parents using drugs on parenting and the consequences it brings.",
+#     "reason": "Controversial opinion that would spark discussion and resonate with young audience."
+#   },
+#   {
+#     "start": "0:00:46.880",
+#     "end": "0:01:06.880",
+#     "summary": "Contemplating the consequences of legalizing drugs and the impact on individuals and society.",
+#     "reason": "Interesting topic that challenges conventional thinking and prompts curiosity."
+#   },
+#   {
+#     "start": "0:05:07.640",
+#     "end": "0:05:21.800",
+#     "summary": "The notion that drug use in society can be managed and behaviors can be changed.",
+#     "reason": "Thought-provoking perspective on societal norms and behaviors around drugs."
+#   }
+# ]
+
+    # read analysis.json
+    # for each clip, use ffmpeg to cut the clip out of the video, with subtitles burned in
+    # save each clip as a seperate video in gen_final/clips/
+    file = open(f"./workspace/{video_id}/gen_final/analysis.json", "r", encoding="utf-8")
+    analysis = file.read()
+    print("Seperating video into clips...")
+    os.makedirs(f"./workspace/{video_id}/gen_final/clips", exist_ok=True)
+    parsed = json.loads(analysis)
+    for clip in parsed:
+        start = clip["start"]
+        end = clip["end"]
+        summary = clip["summary"]
+        reason = clip["reason"]
+        print(f"Cutting clip from {start} to {end} because {reason}...")
+        # output = subprocess.run(["ffmpeg", "-y", "-i", f"./workspace/{video_id}/gen_temp/video.mp4", "-ss", start, "-to", end, "-c", "copy", f"./workspace/{video_id}/gen_final/clips/{summary}.mp4"], capture_output=True)
+        # assert output.returncode == 0
+        # print(f"Saved clip to ./workspace/{video_id}/gen_final/clips/{summary}.mp4")
+
+        subtitle_path = f"./workspace/{video_id}/gen_final/subtitles.srt"
+        out_path = f"./workspace/{video_id}/gen_final/clips/{summary}.mp4"
+        output = subprocess.run(["ffmpeg", "-y", "-i", f"./workspace/{video_id}/gen_temp/video.mp4", "-ss", start, "-to", end, "-vf", f"subtitles={subtitle_path}:force_style='OutlineColour=&H40000000,BorderStyle=3'", "-c:a", "copy", out_path], capture_output=True)
+        assert output.returncode == 0
+        # print(f"Saved clip with burned subs to {out_path}")
+
+if __name__ == "__main__":
+    video_id = download_and_transcribe("https://www.youtube.com/watch?v=xFWakbQAk5Q")
+    print("meow <3! welcome to meow_ttai!")
+    analyse_with_chatgpt(video_id)
+    seperate_into_clips(video_id)
