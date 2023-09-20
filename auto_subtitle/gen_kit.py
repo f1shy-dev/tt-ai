@@ -74,4 +74,5 @@ def main():
     with open(f"./workspace/{video_id}/gen_final/subtitles.txt", "w", encoding="utf-8") as txt:
         txt.write(result["text"])
 
-main()
+if __name__ == "__main__":
+    main()
