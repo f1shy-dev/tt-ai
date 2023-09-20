@@ -102,7 +102,7 @@ example:
 }]"""
     file = open(f"./workspace/{video_id}/gen_final/subtitles.csrt", "r", encoding="utf-8")
     transcript = file.read()
-    print("Analyzing transcript with ChatGPT...")
+    print("Analyzing transcript with GPT3.5-Turbo...")
     response = openai.ChatCompletion.create(
               model="gpt-3.5-turbo-16k",
               messages=[{"role": "system", "content": system_prompt},
