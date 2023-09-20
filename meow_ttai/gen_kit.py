@@ -18,7 +18,8 @@ def main():
     os.makedirs("./workspace", exist_ok=True)
 
     # Ask for a YouTube URL
-    url = input("meow <3! enter your youtewb url: ")
+    # url = input("meow <3! enter your youtewb url: ")
+    url = os.environ.get("WHISPER_URL", input("meow <3! enter your youtewb url: "))
     # url = "https://www.youtube.com/watch?v=xFWakbQAk5Q"
 
     print("Downloading video info...")
