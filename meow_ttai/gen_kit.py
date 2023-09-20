@@ -106,7 +106,7 @@ example:
     response = openai.ChatCompletion.create(
               model="gpt-3.5-turbo-16k",
               messages=[{"role": "system", "content": system_prompt},
-                        {"role": "user", "content": file.read()}
+                        {"role": "user", "content": transcript}
               ])
 
     usage = response["usage"]
