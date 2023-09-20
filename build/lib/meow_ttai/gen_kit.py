@@ -1,4 +1,4 @@
-# from IPython.display import display, Markdown
+from IPython.display import display, Markdown
 import openai
 import os
 import subprocess
