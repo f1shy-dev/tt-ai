@@ -3,7 +3,7 @@ import subprocess
 import yt_dlp
 import whisper
 import ffmpeg
-from .utils import write_srt
+from .utils import write_srt, write_compact_srt
 
 #####################
 #     Variables     #
@@ -61,7 +61,7 @@ def main():
     model = whisper.load_model(MODEL, device=DEVICE)
 
     print("Transcribing audio...")
-    result = model.transcribe(audio_path)
+    result = model.transcribe(audio_path, language="en")
 
     print("Saving subtitles...")
 
@@ -70,6 +70,9 @@ def main():
 
     with open(f"./workspace/{video_id}/gen_final/subtitles.srt", "w", encoding="utf-8") as srt:
         write_srt(result["segments"], file=srt)
+
+    with open(f"./workspace/{video_id}/gen_final/subtitles.csrt", "w", encoding="utf-8") as srt:
+        write_compact_srt(result["segments"], file=srt)
 
     with open(f"./workspace/{video_id}/gen_final/subtitles.txt", "w", encoding="utf-8") as txt:
         txt.write(result["text"])
