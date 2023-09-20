@@ -71,8 +71,8 @@ def main():
     with open(f"./workspace/{video_id}/gen_final/subtitles.srt", "w", encoding="utf-8") as srt:
         write_srt(result["segments"], file=srt)
 
-    with open(f"./workspace/{video_id}/gen_final/subtitles.csrt", "w", encoding="utf-8") as srt:
-        write_compact_srt(result["segments"], file=srt)
+    with open(f"./workspace/{video_id}/gen_final/subtitles.csrt", "w", encoding="utf-8") as csrt:
+        write_compact_srt(result["segments"], file=csrt)
 
     with open(f"./workspace/{video_id}/gen_final/subtitles.txt", "w", encoding="utf-8") as txt:
         txt.write(result["text"])
