@@ -9,7 +9,7 @@ from .utils import write_srt
 #     Variables     #
 
 DEVICE = "cuda" # or "cpu" or "mps" for mac
-MODEL = "small"
+MODEL = "tiny"
 
 #####################
 
