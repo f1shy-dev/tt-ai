@@ -42,18 +42,22 @@ def main():
         'quiet': True,
     }
 
-    print("Downloading video as mp4...")
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        error_code = ydl.download([url])
+# check if video is already downloaded as mp4+audio
+    if os.path.exists(video_path) and os.path.exists(audio_path):
+        print("Video already downloaded as mp4+audio.")
+    else:
+        print("Downloading video as mp4...")
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            error_code = ydl.download([url])
 
 
-    # extract mp3 from mp4
+        # extract mp3 from mp4
 
-    print("Extracting audio from video...")
-    # ffmpeg.input(video_path).output(audio_path, acodec="pcm_s16le", ac=1, ar="16k").run(quiet=True, overwrite_output=True)
-    #run quietly but print errors, overwrite files
-    output = subprocess.run(["ffmpeg", "-y", "-i", video_path, "-vn", "-acodec", "pcm_s16le", "-ac", "1", "-ar", "16k", audio_path], capture_output=True)
-    assert output.returncode == 0
+        print("Extracting audio from video...")
+        # ffmpeg.input(video_path).output(audio_path, acodec="pcm_s16le", ac=1, ar="16k").run(quiet=True, overwrite_output=True)
+        #run quietly but print errors, overwrite files
+        output = subprocess.run(["ffmpeg", "-y", "-i", video_path, "-vn", "-acodec", "pcm_s16le", "-ac", "1", "-ar", "16k", audio_path], capture_output=True)
+        assert output.returncode == 0
 
 
     # https://www.youtube.com/watch?v=xFWakbQAk5Q
