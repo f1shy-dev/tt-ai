@@ -4,8 +4,8 @@ setup(
     version="1.2",
     name="meow",
     packages=find_packages(),
-    py_modules=["auto_subtitle"],
-    author="Miguel Piedrafita",
+    py_modules=["meow_ttai"],
+    author="f1shy_dev",
     install_requires=[
         'openai-whisper',
         'yt-dlp',
@@ -13,7 +13,7 @@ setup(
     ],
     description="Automatically generate and embed subtitles into your videos",
     entry_points={
-        'console_scripts': ['auto_subtitle=auto_subtitle.cli:main'],
+        'console_scripts': ['ttai=meow_ttai.cli:main'],
     },
     include_package_data=True,
 )
