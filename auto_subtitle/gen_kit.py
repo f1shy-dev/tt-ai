@@ -67,7 +67,7 @@ def main():
     print("Transcribing audio...")
     result = model.transcribe(audio_path, language="en")
 
-    print("Saving subtitles...")
+    print("Saving subtitles as txt/srt/csrt...")
 
     # save result["segments"] to srt file
     # save result["text"] to txt file
