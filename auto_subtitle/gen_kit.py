@@ -3,7 +3,7 @@ import subprocess
 import yt_dlp
 import whisper
 import ffmpeg
-import auto_subtitle
+from .utils import write_srt
 
 #####################
 #     Variables     #
@@ -69,7 +69,7 @@ def main():
     # save result["text"] to txt file
 
     with open(f"./workspace/{video_id}/gen_final/subtitles.srt", "w", encoding="utf-8") as srt:
-        auto_subtitle.utils.write_srt(result["segments"], file=srt)
+        write_srt(result["segments"], file=srt)
 
     with open(f"./workspace/{video_id}/gen_final/subtitles.txt", "w", encoding="utf-8") as txt:
         txt.write(result["text"])
