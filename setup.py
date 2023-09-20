@@ -9,7 +9,8 @@ setup(
     install_requires=[
         'openai-whisper',
         'yt-dlp',
-        'ffmpeg'
+        'ffmpeg',
+        'openai'
     ],
     description="Automatically generate and embed subtitles into your videos",
     entry_points={
