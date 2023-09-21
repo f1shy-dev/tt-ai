@@ -52,6 +52,67 @@ def write_compact_srt(transcript: Iterator[dict], file: TextIO):
             flush=True,
         )
 
+def write_word_chunked_srts(transcript: Iterator[dict], srt_file: TextIO, csrt_file: TextIO, chars_per_chunk: int = 48):
+    words = []
+    for i, segment in enumerate(transcript, start=1):
+        words = words + segment['words']
+
+    # split words into chunks of x chars
+    chunks = []
+    chunk = []
+    for word in words:
+        if len(
+            ''.join([word['word'] for word in chunk]).strip().replace('-->', '->')
+        ) + len(word['word']) > chars_per_chunk:
+            chunks.append(chunk)
+            chunk = []
+        chunk.append(word)
+    chunks.append(chunk)
+
+    # write chunks to srt
+
+        # for i in range(0, len(words), words_per_chunk):
+    #     chunk = words[i:min(i + words_per_chunk, len(words))]
+    #     print(
+    #         f"{i}\n"
+    #         f"{format_timestamp(chunk[0]['start'], always_include_hours=True)} --> "
+    #         f"{format_timestamp(chunk[-1]['end'], always_include_hours=True)}\n"
+    #         f"{''.join([word['word'] for word in chunk]).strip().replace('-->', '->')}\n",
+    #         file=srt_file,
+    #         flush=True,
+    #     )
+    #     print(
+    #         f"[{format_timestamp(chunk[0]['start'], always_include_hours=True)} --> "
+    #         f"{format_timestamp(chunk[-1]['end'], always_include_hours=True)}] "
+    #         f"{''.join([word['word'] for word in chunk]).strip().replace('-->', '->')}",
+    #         file=csrt_file,
+    #         flush=True,
+    #     )
+    #     if i + words_per_chunk >= len(words):
+    #         break
+
+    # rewrite to use chars_per_chunk instead of words_per_chunk
+
+    for chunk in chunks:
+        print(
+            f"{i}\n"
+            f"{format_timestamp(chunk[0]['start'], always_include_hours=True)} --> "
+            f"{format_timestamp(chunk[-1]['end'], always_include_hours=True)}\n"
+            f"{''.join([word['word'] for word in chunk]).strip().replace('-->', '->')}\n",
+            file=srt_file,
+            flush=True,
+        )
+        print(
+            f"[{format_timestamp(chunk[0]['start'], always_include_hours=True)} --> "
+            f"{format_timestamp(chunk[-1]['end'], always_include_hours=True)}] "
+            f"{''.join([word['word'] for word in chunk]).strip().replace('-->', '->')}",
+            file=csrt_file,
+            flush=True,
+        )
+
+        
+
+        
 
 def filename(path):
     return os.path.splitext(os.path.basename(path))[0]

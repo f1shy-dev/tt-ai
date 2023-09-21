@@ -6,7 +6,7 @@ import yt_dlp
 import whisper
 import ffmpeg
 import json
-from .utils import write_srt, write_compact_srt
+from .utils import write_srt, write_compact_srt,write_word_chunked_srts
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 #####################
@@ -65,13 +65,17 @@ def download_and_transcribe(url=None):
         assert output.returncode == 0
 
 
+    if os.path.exists(f"./workspace/{video_id}/gen_final/subtitles.srt"):
+        print("Subtitles already generated.")
+        return video_id
     # https://www.youtube.com/watch?v=xFWakbQAk5Q
     print(f"Loading whisper model {MODEL} on device {DEVICE}...")
     model = whisper.load_model(MODEL, device=DEVICE)
 
     print("Transcribing audio...")
-    result = model.transcribe(audio_path, language="en")
+    result = model.transcribe(audio_path, language="en", word_timestamps=True, initial_prompt="Jerogean probably means Joe Rogan. Each segment should be >8 words.", verbose=False)
 
+    # print(result["segments"])
     print("Saving subtitles as txt/srt/csrt...")
 
     # save result["segments"] to srt file
@@ -86,6 +90,7 @@ def download_and_transcribe(url=None):
     with open(f"./workspace/{video_id}/gen_final/subtitles.txt", "w", encoding="utf-8") as txt:
         txt.write(result["text"])
     
+    write_word_chunked_srts(result["segments"], open(f"./workspace/{video_id}/gen_final/subtitles_chunked.srt", "w", encoding="utf-8"), open(f"./workspace/{video_id}/gen_final/subtitles_chunked.csrt", "w", encoding="utf-8"), chars_per_chunk=18)
     return video_id
 
 
@@ -101,6 +106,11 @@ example:
   "summary": "Freedom won't happen for the rest of the world, the divide will remain.",
   "reason": "Super controversial opinion - would engage audience/comments"
 }]"""
+    anal_json = f"./workspace/{video_id}/gen_final/analysis.json"
+    if os.path.exists(anal_json):
+        print("Analysis already exists.")
+        return
+    
     file = open(f"./workspace/{video_id}/gen_final/subtitles.csrt", "r", encoding="utf-8")
     transcript = file.read()
     print("Analyzing transcript with GPT3.5-Turbo...")
@@ -116,7 +126,7 @@ example:
     print(f"Used {prompt} prompt + {comp} completion ({usage['total_tokens']} total ~ ${(prompt/1000*0.0015) + (comp/1000*0.002)}) tokens.")
     print(response["choices"][0]["message"]["content"])
 
-    with open(f"./workspace/{video_id}/gen_final/analysis.json", "w", encoding="utf-8") as json:
+    with open(anal_json, "w", encoding="utf-8") as json:
         json.write(response["choices"][0]["message"]["content"])
 
 
@@ -161,14 +171,27 @@ def seperate_into_clips(video_id):
         # assert output.returncode == 0
         # print(f"Saved clip to ./workspace/{video_id}/gen_final/clips/{summary}.mp4")
 
-        subtitle_path = f"./workspace/{video_id}/gen_final/subtitles.srt"
+        subtitle_path = f"./workspace/{video_id}/gen_final/subtitles_chunked.srt"
         out_path = f"./workspace/{video_id}/gen_final/clips/{summary}.mp4"
-        output = subprocess.run(["ffmpeg", "-y", "-i", f"./workspace/{video_id}/gen_temp/video.mp4", "-ss", start, "-to", end, "-vf", f"subtitles={subtitle_path}:force_style='OutlineColour=&H40000000,BorderStyle=3'", "-c:a", "copy", out_path], capture_output=True)
+        # subtitles should be burned in, white text with black outline in the center of the screen, and crop to tiktok ratio (1080x1920) or smaller in the middle of the screen
+        # output = subprocess.run(["ffmpeg", "-y", "-i", f"./workspace/{video_id}/gen_temp/video.mp4", "-ss", start, "-to", end, "-vf", f"subtitles={subtitle_path}:force_style='OutlineColour=&H40000000,BorderStyle=3'", "-c:a", "copy", out_path], capture_output=True)
+        # sub_style = "Alignment=10,OutlineColour=&H10000000,BorderStyle=3,Fontsize=12,MarginV=25"
+        # sub_style = "Alignment=10,Fontname=Consolas,BackColor=&H00000000,PrimaryColour=&H00FFFFFF,Bold=1,Italid=1,OutlineColour=&H80000000,Spacing=0.2,Outline=0,Shadow=1,MarginV=250,BorderStyle=3,Fontsize=12"
+
+        # center, transparent background, white text, black outline, crop to tiktok ratio, font size 12
+
+        # sub_style = "Alignment=10,Fontname=Consolas,BackColor=&H00000000,PrimaryColour=&H00FFFFFF,Bold=1,Italic=1,Spacing=0.2,Outline=0,Shadow=0,BorderStyle=3,Fontsize=12"
+        sub_style = "Alignment=10,Fontname=Trebuchet MS,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=250,Fontsize=16"
+        output = subprocess.run(["ffmpeg", "-y", "-i", f"./workspace/{video_id}/gen_temp/video.mp4", "-ss", start, "-to", end, "-vf", f"subtitles={subtitle_path}:force_style='{sub_style}',crop=ih*(9/16):ih", "-c:a", "copy",  out_path], capture_output=True)
+        if output.returncode != 0:
+            print(output.stderr)
         assert output.returncode == 0
+    
         # print(f"Saved clip with burned subs to {out_path}")
 
 if __name__ == "__main__":
-    video_id = download_and_transcribe("https://www.youtube.com/watch?v=xFWakbQAk5Q")
+    # video_id = download_and_transcribe("https://www.youtube.com/watch?v=xFWakbQAk5Q")
+    video_id = download_and_transcribe('https://www.youtube.com/watch?v=MOihAGnV5Lo')
     print("meow <3! welcome to meow_ttai!")
     analyse_with_chatgpt(video_id)
     seperate_into_clips(video_id)
