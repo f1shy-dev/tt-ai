@@ -73,7 +73,7 @@ def download_and_transcribe(url=None):
     model = whisper.load_model(MODEL, device=DEVICE)
 
     print("Transcribing audio...")
-    result = model.transcribe(audio_path, language="en", word_timestamps=True, initial_prompt="Jerogean probably means Joe Rogan. Each segment should be >8 words.", verbose=False)
+    result = model.transcribe(audio_path, language="en", word_timestamps=True, verbose=False)
 
     # print(result["segments"])
     print("Saving subtitles as txt/srt/csrt...")
@@ -124,10 +124,15 @@ example:
     prompt = usage['prompt_tokens']
     comp = usage['completion_tokens']
     print(f"Used {prompt} prompt + {comp} completion ({usage['total_tokens']} total ~ ${(prompt/1000*0.0015) + (comp/1000*0.002)}) tokens.")
-    print(response["choices"][0]["message"]["content"])
+    items = response["choices"][0]["message"]["content"]
+
+    # filter out segments that are too short
+    items = [item for item in items if item["end"] - item["start"] > 5]
+    for item in items:
+        print(f"{item['start']} --> {item['end']}: {item['reason']}")
 
     with open(anal_json, "w", encoding="utf-8") as json:
-        json.write(response["choices"][0]["message"]["content"])
+        json.write(json.dumps(items))
 
 
 def seperate_into_clips(video_id):
@@ -165,8 +170,8 @@ def seperate_into_clips(video_id):
         start = clip["start"]
         end = clip["end"]
         summary = clip["summary"]
-        reason = clip["reason"]
-        print(f"Cutting clip from {start} to {end} because {reason}...")
+        # reason = clip["reason"]
+        print(f"Cutting clip from {start} to {end}...")
         # output = subprocess.run(["ffmpeg", "-y", "-i", f"./workspace/{video_id}/gen_temp/video.mp4", "-ss", start, "-to", end, "-c", "copy", f"./workspace/{video_id}/gen_final/clips/{summary}.mp4"], capture_output=True)
         # assert output.returncode == 0
         # print(f"Saved clip to ./workspace/{video_id}/gen_final/clips/{summary}.mp4")
@@ -191,7 +196,8 @@ def seperate_into_clips(video_id):
 
 if __name__ == "__main__":
     # video_id = download_and_transcribe("https://www.youtube.com/watch?v=xFWakbQAk5Q")
-    video_id = download_and_transcribe('https://www.youtube.com/watch?v=MOihAGnV5Lo')
+    video_id = download_and_transcribe()
+    # video_id = download_and_transcribe('https://www.youtube.com/watch?v=MOihAGnV5Lo')
     print("meow <3! welcome to meow_ttai!")
     analyse_with_chatgpt(video_id)
     seperate_into_clips(video_id)
