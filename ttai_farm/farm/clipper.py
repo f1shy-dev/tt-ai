@@ -16,7 +16,7 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
         workspace_dir, 'cache', video_info.folder_name())
 
     video_path = os.path.join(video_folder, f"{video_info.video_id}.mp4")
-    srt_path = os.path.join(video_folder, "transcript.srt")
+    srt_path = os.path.join(video_folder, "transcript.chunked.srt")
     analysis_path = os.path.join(video_folder, "analysis.json")
 
     if not os.path.exists(video_path):
@@ -74,7 +74,8 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
             output = subprocess.run(command,  capture_output=True)
             assert output.returncode == 0, f"Failed to clip video: {output.stderr.decode('utf-8')}"
             progress.update(main_bar, advance=1)
-
+    console.log(
+        f"[grey46]Made {len(analysis)} cropped clips for video '{video_info.extractor}-{video_info.video_id}'")
     clip_folder = os.path.join(
         workspace_dir, "clips", video_info.folder_name())
     os.makedirs(clip_folder, exist_ok=True)

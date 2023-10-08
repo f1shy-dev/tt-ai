@@ -60,7 +60,7 @@ def write_word_chunked_srts(transcript: Iterator[dict], srt_file: TextIO, csrt_f
         chunk.append(word)
     chunks.append(chunk)
 
-    for chunk in chunks:
+    for i, chunk in enumerate(chunks, start=1):
         print(
             f"{i}\n"
             f"{format_timestamp(chunk[0]['start'], always_include_hours=True)} --> "
