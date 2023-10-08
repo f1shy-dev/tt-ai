@@ -17,5 +17,10 @@ dependencies = [
     "rich",
 ]
 
+
 [project.scripts]
 farmcli = "ttai_farm.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ttai_farm"]

@@ -39,7 +39,7 @@ def download_video_info(workspace_dir: str, skip_dl_video_if_cached: bool, url: 
 
 
 def download_video(workspace_dir: str, skip_dl_video_if_cached: bool, video_info: VideoInfo):
-    with status(f"Downloading video '{video_info.extractor}-{video_info.video_id}'"):
+    with status(f"Downloading video '{video_info.extractor}-{video_info.video_id}'") as s:
         video_path = os.path.join(
             workspace_dir, 'cache', video_info.folder_name(), f"{video_info.video_id}.mp4")
         audio_path = os.path.join(
@@ -66,8 +66,9 @@ def download_video(workspace_dir: str, skip_dl_video_if_cached: bool, video_info
                 console.log(
                     f"Downloaded video '{video_info.extractor}-{video_info.video_id}' as mp4@best")
 
-    if not os.path.exists(audio_path):
-        with status(f"Extracting audio from video '{video_info.extractor}-{video_info.video_id}' with ffmpeg"):
+        if not os.path.exists(audio_path):
+            s.update(
+                f"Extracting audio from video '{video_info.extractor}-{video_info.video_id}' with ffmpeg")
             output = subprocess.run(["ffmpeg", "-y", "-i", video_path, "-vn", "-acodec",
                                     "pcm_s16le", "-ac", "1", "-ar", "16k", audio_path], capture_output=True)
             if output.returncode != 0:

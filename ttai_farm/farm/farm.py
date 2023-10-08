@@ -50,8 +50,7 @@ class Farm:
               self.skip_transcription_if_cached)
 
     def get_video_info(self, url):
-        with status(f"Downloading video info for {url}..."):
-            return download_video_info(self.workspace_dir, self.skip_dl_video_if_cached, url)
+        return download_video_info(self.workspace_dir, self.skip_dl_video_if_cached, url)
 
     def download_video(self, info: VideoInfo):
         return download_video(self.workspace_dir, self.skip_dl_video_if_cached, info)
