@@ -54,8 +54,7 @@ class Farm:
             return download_video_info(self.workspace_dir, self.skip_dl_video_if_cached, url)
 
     def download_video(self, info: VideoInfo):
-        with status(f"Downloading video '{info.extractor}-{info.video_id}'"):
-            return download_video(self.workspace_dir, self.skip_dl_video_if_cached, info)
+        return download_video(self.workspace_dir, self.skip_dl_video_if_cached, info)
 
     def transcribe_video(self, info: VideoInfo, *, language: str | None = "en"):
         if self.torch_device == "cpu":
