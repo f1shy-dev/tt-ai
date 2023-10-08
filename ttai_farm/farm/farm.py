@@ -7,6 +7,7 @@ from .transcribe import transcribe_video
 import warnings
 import json
 from ttai_farm.console import status, console
+from .clipper import clip_video
 
 
 def detect_device():
@@ -27,6 +28,7 @@ class Farm:
 
     skip_analysis_if_cached: bool = True
     skip_dl_video_if_cached: bool = True
+    skip_clip_if_cached: bool = True
     skip_transcription_if_cached: bool = True
     max_chars_per_sub_chunk: int = 18
 
@@ -103,3 +105,6 @@ class Farm:
             f"[white]Saving analysis with {len(analysis)} clips to cache...")
         with open(analysis_path, "w", encoding="utf-8") as f:
             f.write(json.dumps(list(map(lambda x: x.__dict__, analysis)), indent=4))
+
+    def clip_video(self, info: VideoInfo):
+        clip_video(self.workspace_dir, self.skip_clip_if_cached, info)

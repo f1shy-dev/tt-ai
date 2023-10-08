@@ -12,10 +12,11 @@ def main():
         whisper_into_memory=True,
         whisper_model="tiny",
     )
-    info = farm.get_video_info("https://www.youtube.com/watch?v=9bZkp7q19f0")
+    info = farm.get_video_info("https://www.youtube.com/watch?v=RcYjXbSJBN8")
     farm.download_video(info)
     farm.transcribe_video(info, language=None)
     farm.analyze_video(info)
+    farm.clip_video(info)
 
 
 if __name__ == "__main__":

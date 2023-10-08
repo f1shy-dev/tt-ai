@@ -1,3 +1,4 @@
+import torch
 from tqdm import TqdmExperimentalWarning
 import warnings
 import whisper
@@ -12,7 +13,6 @@ import whisper.transcribe
 transcribe_module = sys.modules['whisper.transcribe']
 transcribe_module.tqdm.tqdm = tqdm
 warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
-
 file_names = [
     "transcript.srt",
     "transcript.compact.srt",
@@ -43,7 +43,7 @@ def transcribe_video(workspace_dir: str, skip_transcription_if_cached: bool, vid
     console.log(
         f"[grey46]Loading whisper model {whisper_model} on device {torch_device}")
     model = whisper.load_model(
-        whisper_model, device=torch_device, in_memory=whisper_into_memory)
+        whisper_model, device=torch.device(torch_device), in_memory=whisper_into_memory)
 
     console.log("[white]Transcribing audio...")
     result = model.transcribe(
