@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ttai_farm"
+version = "2.0"
+description = "Automatically generate videos using AI."
+dependencies = [
+    "openai-whisper",
+    "yt-dlp",
+    "ffmpeg",
+    "openai",
+    "torch",
+    "requests",
+    "tiktoken",
+    "rich",
+]
+
+[project.scripts]
+farmcli = "ttai_farm.cli:main"

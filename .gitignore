@@ -1,0 +1,9 @@
+dist
+.DS_Store
+*.egg-info
+auto_subtitle/__pycache__
+workspace/
+
+__pycache__/
+*/__pycache__/
+build/
