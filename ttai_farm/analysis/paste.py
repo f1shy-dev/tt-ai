@@ -15,7 +15,7 @@ class PasteAnalysisProvider(AnalysisProvider):
             "[grey46]Please paste the analysis JSON for the video below.\nType 'CLS' and press enter to clear all input.\nType 'EOF' and press enter to save and continue.")
         if len(json_input_lines) > 0:
             console.print(Syntax("\n".join(json_input_lines),
-                                 "json", theme="ansi_dark", line_numbers=True, word_wrap=True))
+                                 "json", theme="ansi_dark",  word_wrap=True))
         else:
             console.print()
 
