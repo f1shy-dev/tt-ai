@@ -59,6 +59,7 @@ def download_video(workspace_dir: str, skip_dl_video_if_cached: bool, video_info
                 'outtmpl': video_path,
                 'quiet': True,
                 'no_warnings': True,
+                'noprogress': True,
             }) as ydl:
                 error_code = ydl.download_with_info_file(info_path)
                 if error_code != 0:
