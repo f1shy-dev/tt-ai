@@ -95,7 +95,7 @@ class Farm:
                     "Failed to load cached analysis, re-analyzing...", style="red")
 
         file = open(os.path.join(
-            video_folder, "transcript.compact.srt"), "r", encoding="utf-8")
+            video_folder, "transcript.sen_chunked.compact.srt"), "r", encoding="utf-8")
         analysis = self.analysis_provider.analyze(file.read())
         if analysis is None or len(analysis) == 0:
             console.print(analysis)

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from ttai_farm.console import status, console
 import json
 from ttai_farm.analysis import AnalysisChunk
-from ttai_farm.utils import parse_timestamp_date
+from ttai_farm.utils import parse_timestamp_date, format_timestamp
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCompleteColumn
 import subprocess
 
@@ -104,8 +104,9 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
             x[2]
         ], fmt_srt_data))
 
-        print(fmt_srt_data, file=open(os.path.join(
-            "workspace", "test.txt"), "w", encoding="utf-8"))
+        if os.path.exists(os.path.join(video_folder, "srt-clips")):
+            for file in os.listdir(os.path.join(video_folder, "srt-clips")):
+                os.remove(os.path.join(video_folder, "srt-clips", file))
         srtclip_folder = os.path.join(video_folder, "srt-clips")
         os.makedirs(srtclip_folder, exist_ok=True)
 
@@ -114,55 +115,38 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
                 video_folder, "clips", f"{i:03d}-{chunk.start}-{chunk.end}.mp4")
 
             sub_clip_path = os.path.join(
-                clip_folder, f"{i:03d}-{chunk.start}-{chunk.end}-sub.mp4")
+                clip_folder, f"{i:03d}-sub.mp4")
             if os.path.exists(sub_clip_path):
                 continue
 
-            # take format like this
-
-# 1
-# 0:00:00.620 --> 0:00:02.440
-# Welcome back. Here
-
-# 2
-# 0:00:02.440 --> 0:00:03.020
-# we go again. Great
-
-# 3
-# 0:00:03.020 --> 0:00:03.480
-# to see you and
-
-# 4
-# 0:00:03.480 --> 0:00:04.080
-# congratulations.
-
-# 5
-# 0:00:04.400 --> 0:00:05.980
-# Thank you. You
-
-# 6
-# 0:00:05.980 --> 0:00:06.980
-# will never forget
-
-
-# find the start and end time of the clip
-# cut the complete srt file to the start and end time
-# adjust the start and end time of the srt file to start at 0
             start_ts = parse_timestamp_date(chunk.start)
             end_ts = parse_timestamp_date(chunk.end)
-            start_chunk = [i for i, x in enumerate(
-                fmt_srt_data) if x[1] == start_ts][0]
-            end_chunk = [i for i, x in enumerate(
-                fmt_srt_data) if x[2] == end_ts][0]
 
-            sub_srt_data = fmt_srt_data[start_chunk[0] - 1:end_chunk[0]]
-            # write the clipped srt file to the clip folder, overwriting if it exists
+            start_chunk = filter(
+                lambda x: x[1] <= start_ts <= x[2], fmt_srt_data)
+            start_chunk = list(start_chunk)[0]
+
+            end_chunk = filter(lambda x: x[1] <= end_ts <= x[2], fmt_srt_data)
+            end_chunk = list(end_chunk)[0]
+
+            sub_srt_data = fmt_srt_data[int(
+                start_chunk[0]) - 1:int(end_chunk[0]) - 1]
+
             sub_srt_path = os.path.join(
-                srtclip_folder, f"{i:03d}-{chunk.start}-{chunk.end}.srt")
-            # console.print(sub_srt_data)
+                srtclip_folder, f"{i:03d}-{chunk.start.replace(':', '_')}-{chunk.end.replace(':', '_')}.srt")
+
+            first_chunk = sub_srt_data[0]
+            num_offset = int(first_chunk[0])
+            ts_offset = first_chunk[1]
+            ts_offset_ms = ts_offset[0] * 3600 + \
+                ts_offset[1] * 60 + ts_offset[2]
+
+            def fmt_ts(x): return format_timestamp(
+                (x[0] * 3600 + x[1] * 60 + x[2]) - ts_offset_ms, always_include_hours=True)
+
             with open(sub_srt_path, "w", encoding="utf-8") as sub_srt_file:
-                srt_file.write("\n\n".join(list(map(lambda x: "\n".join(
-                    [str(x[0]), f"{x[1]} --> {x[2]}", x[3]]), sub_srt_data))))
+                sub_srt_file.write("\n\n".join(list(map(lambda x: "\n".join(
+                    [str(int(x[0]) - num_offset + 1), f"{fmt_ts(x[1])} --> {fmt_ts(x[2])}", x[3]]), sub_srt_data))))
 
             sub_style = "Alignment=10,Fontname=Trebuchet MS,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=250,Fontsize=16"
             # command = f"ffmpeg -y -i \"{og_clip_path}\" -vf 'subtitles=\"{srt_path}\":force_style=\"{sub_style}\"' \"{sub_clip_path}\""
@@ -172,7 +156,8 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
                 "-i",
                 og_clip_path,
                 "-vf",
-                f"subtitles={sub_srt_path}:force_style='{sub_style}'",
+                # :force_style='{sub_style}'
+                f"subtitles='{sub_srt_path}':force_style='{sub_style}'",
                 "-c:a",
                 "copy",
                 sub_clip_path
