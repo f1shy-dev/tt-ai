@@ -15,6 +15,9 @@ def main():
     parser.add_argument("--analysis-provider", type=str, default="paste",
                         choices=["paste", "openai"], help="The analysis provider to use.")
 
+    parser.add_argument("--openai-api-key", type=str, default=None, metavar="sk-***",
+                        help="The OpenAI API key to use when using 'openai' for analysis. If not specified, the OPENAI_API_KEY environment variable will be used.")
+
     parser.add_argument("--whisper-model", type=str,
                         default="small.en", help="The whisper model to use.", choices=whisper.available_models())
 
@@ -34,9 +37,12 @@ def main():
                         help="The URLs of the videos to process.")
     args = parser.parse_args()
 
-    analysis_providers = [PasteAnalysisProvider, OpenAIAnalysisProvider]
-    analysis_provider = analysis_providers[[
-        "paste", "openai"].index(args.analysis_provider)]()
+    analysis_provider = None
+    if args.analysis_provider == "paste":
+        analysis_provider = PasteAnalysisProvider()
+    if args.analysis_provider == "openai":
+        analysis_provider = OpenAIAnalysisProvider(
+            openai_api_key=args.openai_api_key)
 
     farm = Farm(
         workspace_dir=args.workspace,

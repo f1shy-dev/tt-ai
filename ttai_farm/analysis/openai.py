@@ -24,7 +24,8 @@ class OpenAIAnalysisProvider(AnalysisProvider):
     "summary": "Freedom won't happen for the rest of the world, the divide will remain.",
     "reason": "Super controversial opinion - would engage audience/comments"
     }]"""
-            openai.api_key = self.openai_api_key
+            openai.api_key = self.openai_api_key or os.environ.get(
+                "OPENAI_API_KEY")
             response = openai.ChatCompletion.create(
                 model=self.model,
                 messages=[{"role": "system", "content": system_prompt},
