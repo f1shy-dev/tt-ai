@@ -92,6 +92,8 @@ def write_chunked_srts(transcript: Iterator[dict], srt_file: TextIO, csrt_file: 
     sentences.append(sentence)
 
     for i, sentence in enumerate(sentences, start=1):
+        if len(sentence) == 0:
+            continue
         print(
             f"{i}\n"
             f"{format_timestamp(sentence[0]['start'], always_include_hours=True)} --> "
