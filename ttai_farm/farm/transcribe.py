@@ -2,23 +2,26 @@ import torch
 from tqdm import TqdmExperimentalWarning
 import warnings
 import whisper
-from ttai_farm.utils import write_compact_srt, write_srt, write_word_chunked_srts
+from ttai_farm.utils import write_compact_srt, write_srt, write_chunked_srts
 from .download_video import VideoInfo
 import os
-from dataclasses import dataclass
 import sys
 from tqdm.rich import tqdm
-from ttai_farm.console import status, console
+from ttai_farm.console import console
+import json
 import whisper.transcribe
 transcribe_module = sys.modules['whisper.transcribe']
 transcribe_module.tqdm.tqdm = tqdm
 warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
 file_names = [
     "transcript.srt",
+    "transcript.map",
     "transcript.compact.srt",
     "transcript.txt",
     "transcript.chunked.compact.srt",
     "transcript.chunked.srt",
+    "transcript.sen_chunked.compact.srt",
+    "transcript.sen_chunked.srt",
 ]
 
 
@@ -64,8 +67,19 @@ def transcribe_video(workspace_dir: str, skip_transcription_if_cached: bool, vid
         video_folder, "transcript.chunked.compact.srt"), "w", encoding="utf-8")
     ch_srts_file = open(os.path.join(
         video_folder, "transcript.chunked.srt"), "w", encoding="utf-8")
-    write_word_chunked_srts(result["segments"], srt_file=ch_srts_file,
-                            csrt_file=ch_csrt_file, chars_per_chunk=chars_per_chunk)
+
+    sch_csrt_file = open(os.path.join(
+        video_folder, "transcript.sen_chunked.compact.srt"), "w", encoding="utf-8")
+    sch_srts_file = open(os.path.join(
+        video_folder, "transcript.sen_chunked.srt"), "w", encoding="utf-8")
+
+    sch_srts_file = open(os.path.join(
+        video_folder, "transcript.map"), "w", encoding="utf-8")
+
+    print(json.dumps(result), file=sch_srts_file)
+
+    write_chunked_srts(result["segments"], srt_file=ch_srts_file,
+                       csrt_file=ch_csrt_file, chars_per_chunk=chars_per_chunk, sentence_csrt_file=sch_csrt_file, sentence_srt_file=sch_srts_file)
 
     console.log(
         f"Saved transcribed transcript - {len(result['text'].split())} words")

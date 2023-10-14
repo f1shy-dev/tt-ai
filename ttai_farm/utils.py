@@ -42,7 +42,9 @@ def write_compact_srt(transcript: Iterator[dict], file: TextIO):
         )
 
 
-def write_word_chunked_srts(transcript: Iterator[dict], srt_file: TextIO, csrt_file: TextIO, chars_per_chunk: int = 48):
+def write_chunked_srts(transcript: Iterator[dict], srt_file: TextIO, csrt_file: TextIO,
+                       sentence_srt_file: TextIO, sentence_csrt_file: TextIO,
+                       chars_per_chunk: int = 48):
     words = []
     for i, segment in enumerate(transcript, start=1):
         words = words + segment['words']
@@ -74,6 +76,35 @@ def write_word_chunked_srts(transcript: Iterator[dict], srt_file: TextIO, csrt_f
             f"{format_timestamp(chunk[-1]['end'], always_include_hours=True)}] "
             f"{''.join([word['word'] for word in chunk]).strip().replace('-->', '->')}",
             file=csrt_file,
+            flush=True,
+        )
+
+    # chunked by sentence
+    sentences = []
+    sentence = []
+    for word in words:
+        if word['word'].endswith('.'):
+            sentence.append(word)
+            sentences.append(sentence)
+            sentence = []
+        else:
+            sentence.append(word)
+    sentences.append(sentence)
+
+    for i, sentence in enumerate(sentences, start=1):
+        print(
+            f"{i}\n"
+            f"{format_timestamp(sentence[0]['start'], always_include_hours=True)} --> "
+            f"{format_timestamp(sentence[-1]['end'], always_include_hours=True)}\n"
+            f"{''.join([word['word'] for word in sentence]).strip().replace('-->', '->')}\n",
+            file=sentence_srt_file,
+            flush=True,
+        )
+        print(
+            f"[{format_timestamp(sentence[0]['start'], always_include_hours=True)} --> "
+            f"{format_timestamp(sentence[-1]['end'], always_include_hours=True)}] "
+            f"{''.join([word['word'] for word in sentence]).strip().replace('-->', '->')}",
+            file=sentence_csrt_file,
             flush=True,
         )
 

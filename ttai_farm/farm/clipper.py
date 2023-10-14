@@ -104,7 +104,10 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
             x[2]
         ], fmt_srt_data))
 
-        console.print(fmt_srt_data)
+        print(fmt_srt_data, file=open(os.path.join(
+            "workspace", "test.txt"), "w", encoding="utf-8"))
+        srtclip_folder = os.path.join(video_folder, "srt-clips")
+        os.makedirs(srtclip_folder, exist_ok=True)
 
         for i, chunk in enumerate(analysis):
             og_clip_path = os.path.join(
@@ -145,14 +148,21 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
 # find the start and end time of the clip
 # cut the complete srt file to the start and end time
 # adjust the start and end time of the srt file to start at 0
+            start_ts = parse_timestamp_date(chunk.start)
+            end_ts = parse_timestamp_date(chunk.end)
+            start_chunk = [i for i, x in enumerate(
+                fmt_srt_data) if x[1] == start_ts][0]
+            end_chunk = [i for i, x in enumerate(
+                fmt_srt_data) if x[2] == end_ts][0]
 
-            # start_chunk = [i for i, x in enumerate(
-            #     fmt_srt_data) if x[1] == chunk.start][0]
-            # end_chunk = [i for i, x in enumerate(
-            #     fmt_srt_data) if x[2] == chunk.end][0]
-
-            # sub_srt_data = fmt_srt_data[start_chunk[0] - 1:end_chunk[0]]
+            sub_srt_data = fmt_srt_data[start_chunk[0] - 1:end_chunk[0]]
+            # write the clipped srt file to the clip folder, overwriting if it exists
+            sub_srt_path = os.path.join(
+                srtclip_folder, f"{i:03d}-{chunk.start}-{chunk.end}.srt")
             # console.print(sub_srt_data)
+            with open(sub_srt_path, "w", encoding="utf-8") as sub_srt_file:
+                srt_file.write("\n\n".join(list(map(lambda x: "\n".join(
+                    [str(x[0]), f"{x[1]} --> {x[2]}", x[3]]), sub_srt_data))))
 
             sub_style = "Alignment=10,Fontname=Trebuchet MS,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=250,Fontsize=16"
             # command = f"ffmpeg -y -i \"{og_clip_path}\" -vf 'subtitles=\"{srt_path}\":force_style=\"{sub_style}\"' \"{sub_clip_path}\""
@@ -162,7 +172,7 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
                 "-i",
                 og_clip_path,
                 "-vf",
-                f"subtitles={srt_path}:force_style='{sub_style}'",
+                f"subtitles={sub_srt_path}:force_style='{sub_style}'",
                 "-c:a",
                 "copy",
                 sub_clip_path
