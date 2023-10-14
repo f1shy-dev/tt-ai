@@ -8,7 +8,7 @@ import whisper
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Automatically generate videos using AI.")
+        description="Automatically clip and subtitle videos using AI.")
     parser.add_argument("--workspace", type=path.abspath, default="workspace", metavar="PATH",
                         help="The directory to store workspace files.")
 
