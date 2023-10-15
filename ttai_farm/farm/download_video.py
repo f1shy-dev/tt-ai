@@ -53,13 +53,17 @@ def download_video(workspace_dir: str, skip_dl_video_if_cached: bool, video_info
             if os.path.exists(audio_path):
                 os.remove(audio_path)
 
+        # colab detect
+        RunningInCOLAB = 'google.colab' in str(get_ipython()) if hasattr(
+            __builtins__, '__IPYTHON__') else False
+
         if not os.path.exists(video_path):
             with yt_dlp.YoutubeDL({
                 'format': 'mp4/bestvideo+bestaudio',
                 'outtmpl': video_path,
                 'quiet': True,
                 'no_warnings': True,
-                'noprogress': True,
+                'noprogress': RunningInCOLAB
             }) as ydl:
                 error_code = ydl.download_with_info_file(info_path)
                 if error_code != 0:

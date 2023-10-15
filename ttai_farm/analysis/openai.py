@@ -27,17 +27,18 @@ class OpenAIAnalysisProvider(AnalysisProvider):
     }]
     
     Just to repeat, output MUST BE JSON format."""
+
             openai.api_key = self.openai_api_key or os.environ.get(
                 "OPENAI_API_KEY")
             response = openai.ChatCompletion.create(
-                model=self.model,
+                model=self.model or "gpt-3.5-turbo-16k",
                 messages=[{"role": "system", "content": system_prompt},
                           {"role": "user", "content": text}]
             )
             usage = response["usage"]
             prompt = usage['prompt_tokens']
             comp = usage['completion_tokens']
-            print(
+            console.log(
                 f"Used {prompt} prompt + {comp} completion ({usage['total_tokens']} total ~ ${(prompt/1000*0.0015) + (comp/1000*0.002)}) tokens.")
             items = response["choices"][0]["message"]["content"]
 
@@ -53,7 +54,7 @@ class OpenAIAnalysisProvider(AnalysisProvider):
                 raise ValueError(
                     "No segments were found that were longer than 10 seconds.")
             if og_length != len(items):
-                print(
-                    f"Filtered out {og_length - len(items)} segments that were too short.")
+                console.log(
+                    f"[grey46]Filtered out {og_length - len(items)} segments that were too short.")
 
             return [AnalysisChunk(**item) for item in items]

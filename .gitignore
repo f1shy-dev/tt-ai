@@ -7,3 +7,5 @@ workspace/
 __pycache__/
 */__pycache__/
 build/
+testing-dl/
+*urls.txt

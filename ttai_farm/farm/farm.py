@@ -3,6 +3,7 @@ from ..analysis import AnalysisProvider
 from dataclasses import dataclass
 import torch
 from .download_video import download_video, download_video_info, VideoInfo
+from .download_spotify import download_spotify, download_spotify_info
 from .transcribe import transcribe_video
 import warnings
 import json
@@ -31,6 +32,7 @@ class Farm:
     skip_clip_if_cached: bool = True
     skip_transcription_if_cached: bool = True
     max_chars_per_sub_chunk: int = 18
+    spotify_credentials: tuple[str, str] | None = None
 
     def __post_init__(self):
         self.workspace_dir = os.path.abspath(self.workspace_dir)
@@ -52,9 +54,13 @@ class Farm:
               self.skip_transcription_if_cached)
 
     def get_video_info(self, url):
+        if 'spotify' in url:
+            return download_spotify_info(self.workspace_dir, self.skip_dl_video_if_cached, url, self.spotify_credentials[0], self.spotify_credentials[1])
         return download_video_info(self.workspace_dir, self.skip_dl_video_if_cached, url)
 
     def download_video(self, info: VideoInfo):
+        if info.extractor == 'spotify-show':
+            return download_spotify(self.workspace_dir, self.skip_dl_video_if_cached, info)
         return download_video(self.workspace_dir, self.skip_dl_video_if_cached, info)
 
     def transcribe_video(self, info: VideoInfo, *, language: str | None = "en"):

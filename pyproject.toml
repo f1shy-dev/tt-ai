@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ttai_farm"
-version = "2.0"
-description = "Automatically generate videos using AI."
+version = "2.0.12"
+description = "Automatically clip and subtitle videos using AI."
 dependencies = [
     "openai-whisper",
     "yt-dlp",
@@ -15,6 +15,9 @@ dependencies = [
     "requests",
     "tiktoken",
     "rich",
+    "poe-api-wrapper",
+    # "git+https://github.com/kokarare1212/librespot-python",
+    "librespot@git+https://github.com/kokarare1212/librespot-python",
 ]
 
 
