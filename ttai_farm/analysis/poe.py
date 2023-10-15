@@ -36,7 +36,7 @@ class PoeAnalysisProvider(AnalysisProvider):
         response = ""
 
         try:
-            for chunk in client.send_message(bot, f"""{prompt}{text}\n\n{end_reminder}\n\n{prompt}""", timeout=4):
+            for chunk in client.send_message(bot, f"""{prompt}{text}\n\n{end_reminder}\n\n{prompt}""", timeout=20):
                 pass
             response = chunk["text"]
             console.log("[green]Got response from bot!")
