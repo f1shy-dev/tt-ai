@@ -31,10 +31,12 @@ class PoeAnalysisProvider(AnalysisProvider):
     Please dont add anything else like "here is the ..." or anything that isnt part of the json to your response.
 
     Just to repeat, output MUST BE JSON array format, and ONLY give me the JSON in the message, and each segment should be 10+ seconds, max 1 or so minutes...\n\nTranscript:\n"""
+
+        end_reminder = """Just so you don't forget, here are your instructions again:"""
         response = ""
 
         try:
-            for chunk in client.send_message(bot, prompt + text, timeout=4):
+            for chunk in client.send_message(bot, f"""{prompt}{text}\n\n{end_reminder}\n\n{prompt}""", timeout=4):
                 pass
             response = chunk["text"]
             console.log("[green]Got response from bot!")
