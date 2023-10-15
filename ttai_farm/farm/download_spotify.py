@@ -171,7 +171,7 @@ def download_spotify(workspace_dir: str, skip_dl_video_if_cached: bool, video_in
             output = subprocess.run(command, capture_output=True)
             assert output.returncode == 0, f"[red]Failed to merge audio segments: {output.stderr.decode('utf-8')}"
             console.log(
-                f"Merged {len(audio_segments_urls)} audio segments into one {dec(os.path.getsize(audio_path))} file")
+                f"[grey46]Merged {len(audio_segments_urls)} audio segments into one {dec(os.path.getsize(audio_path))} file")
 
     if not os.path.exists(wav_audio_path):
         with status(
