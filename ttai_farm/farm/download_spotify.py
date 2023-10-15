@@ -69,7 +69,7 @@ def download_spotify(workspace_dir: str, skip_dl_video_if_cached: bool, video_in
         video_path = os.path.join(v_folder, f"{video_info.video_id}.video.ts")
         audio_path = os.path.join(v_folder, f"{video_info.video_id}.audio.ts")
         wav_audio_path = os.path.join(v_folder, f"{video_info.video_id}.wav")
-        combined_path = os.path.join(v_folder, f"{video_info.video_id}.ts")
+        combined_path = os.path.join(v_folder, f"{video_info.video_id}.mp4")
         video_segment_folder = os.path.join(v_folder, "seg_video")
         audio_segment_folder = os.path.join(v_folder, "seg_audio")
         info_path = os.path.join(v_folder, 'info.json')
