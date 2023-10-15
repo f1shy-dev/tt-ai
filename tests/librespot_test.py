@@ -10,7 +10,7 @@ console.log("got spotify session", session)
 access_token = session.tokens().get("playlist-read")
 console.log("got access token", access_token)
 ep = EpisodeId.from_base62(
-    "6OwITXMGgY0mVCGdKRJrYr")
+    "66edV3LAbUXa26HG1ZQaKB")
 
 console.log("got episode id", ep)
 meta = session.api().get_metadata_4_episode(ep)
@@ -90,12 +90,16 @@ audio_segments_urls = list(map(lambda x: base_url + template(
 print(len(video_segments_urls), len(audio_segments_urls))
 
 
-print("\n".join(video_segments_urls), file=open("video_segments_urls.txt", "w"))
-print("\n".join(audio_segments_urls), file=open("audio_segments_urls.txt", "w"))
+# print("\n".join(video_segments_urls), file=open("video_segments_urls.txt", "w"))
+# print("\n".join(audio_segments_urls), file=open("audio_segments_urls.txt", "w"))
 
-# write ffmpeg packlist like "file 'dl/0.webm'"
+# # write ffmpeg packlist like "file 'dl/0.webm'"
 
-with open("ffmpeg-packlist-video.txt", "w") as f:
-    # print(f"file 'testing-dl/init.webm'", file=f)
-    for i in range(len(video_segments_urls)):
-        print(f"file 'testing-dl/{i * 4}.ts'", file=f)
+# with open("ffmpeg-packlist-video.txt", "w") as f:
+#     # print(f"file 'testing-dl/init.webm'", file=f)
+#     for i in range(len(video_segments_urls)):
+#         print(f"file 'testing-dl/{i * 4}.ts'", file=f)
+
+
+for lang, url in subtitle_urls.items():
+    print(lang, url)
