@@ -10,6 +10,7 @@ from ttai_farm.console import console
 from librespot.metadata import EpisodeId
 from .threaded_downloader import threaded_downloader
 from rich.filesize import decimal as dec
+import re
 
 
 def download_spotify_info(workspace_dir: str, skip_dl_video_if_cached: bool, url: str, username: str, password: str):
@@ -24,7 +25,9 @@ def download_spotify_info(workspace_dir: str, skip_dl_video_if_cached: bool, url
         # console.log("got spotify session", session)
         # access_token = session.tokens().get("playlist-read")
         # console.log("got access token", access_token)
-        ep = EpisodeId.from_base62(url.split("/")[-1])
+        match = re.search(r'(show\/|episode\/|show:)([A-Za-z0-9]+)',url).group(2)
+        assert match, "Couldn't determine your url..."
+        ep = EpisodeId.from_base62(match)
 
         # console.log("got episode id", ep)
         meta = session.api().get_metadata_4_episode(ep)
