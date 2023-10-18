@@ -113,4 +113,4 @@ def write_chunked_srts(transcript: Iterator[dict], srt_file: TextIO, csrt_file: 
 
 def parse_timestamp_date(timestamp):
     hours, minutes, seconds = timestamp.split(":")
-    return int(hours), int(minutes), float(seconds)
+    return int(hours), int(minutes), float(seconds.replace(",", "."))

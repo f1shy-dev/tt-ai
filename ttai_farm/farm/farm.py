@@ -25,6 +25,9 @@ class Farm:
     analysis_provider: AnalysisProvider
     whisper_model: str = "small.en"
     whisper_into_memory: bool = False
+    whisper_cpp_path: str | None = None
+    whisper_cpp_threads: int = 8
+    whisper_cpp_args: list[str] = []
     torch_device: str = detect_device()
 
     skip_analysis_if_cached: bool = True
@@ -76,7 +79,10 @@ class Farm:
             self.torch_device,
             self.max_chars_per_sub_chunk,
             language,
-            self.whisper_into_memory
+            self.whisper_into_memory,
+            self.whisper_cpp_path,
+            self.whisper_cpp_threads,
+            self.whisper_cpp_args
         )
 
     def analyze_video(self, info: VideoInfo):
