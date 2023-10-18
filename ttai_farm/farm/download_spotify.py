@@ -25,7 +25,8 @@ def download_spotify_info(workspace_dir: str, skip_dl_video_if_cached: bool, url
         # console.log("got spotify session", session)
         # access_token = session.tokens().get("playlist-read")
         # console.log("got access token", access_token)
-        match = re.search(r'(show\/|episode\/|show:)([A-Za-z0-9]+)',url).group(2)
+        match = re.search(
+            r'(show\/|episode\/|show:)([A-Za-z0-9]+)', url).group(2)
         assert match, "Couldn't determine your url..."
         ep = EpisodeId.from_base62(match)
 
@@ -100,7 +101,7 @@ def download_spotify(workspace_dir: str, skip_dl_video_if_cached: bool, video_in
                         segment_length)
         base_url = drm_manifest['base_urls'][0]
 
-    if not os.path.exists(video_path):
+    if not os.path.exists(video_path) and not os.path.exists(combined_path):
         best_video_stream = max(list(filter(
             lambda x: x['mime_type'] == 'video/mp2t', profiles)), key=lambda x: x.get('video_bitrate', 0))
         video_segments_urls = list(map(lambda x: base_url + template(
@@ -138,7 +139,7 @@ def download_spotify(workspace_dir: str, skip_dl_video_if_cached: bool, video_in
             console.log(
                 f"[grey46]Merged {len(video_segments_urls)} video segments into one {dec(os.path.getsize(video_path))} file")
 
-    if not os.path.exists(audio_path):
+    if not os.path.exists(audio_path) and (not os.path.exists(combined_path) or not os.path.exists(wav_audio_path)):
         best_audio_stream = max(list(filter(
             lambda x: x['mime_type'] == 'audio/mp2t', profiles)), key=lambda x: x.get('audio_bitrate', 0))
         audio_segments_urls = list(map(lambda x: base_url + template(
