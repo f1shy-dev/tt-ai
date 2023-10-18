@@ -212,7 +212,7 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
                 "watermarks/km-watermark.png",
                 "-filter_complex",
                 # center watermark, make it 512x512 (image is 1024x1024)
-                "[1]scale=304:304[wm];[0][wm]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2+100",
+                "[1]scale=304:304[wm];[0][wm]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2+200",
 
                 "-c:a",
                 "copy",
