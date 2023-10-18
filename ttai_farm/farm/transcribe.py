@@ -81,24 +81,18 @@ def transcribe_video(
 
         def seconds(x): return x[0] * 3600 + x[1] * 60 + x[2]
         fmt_srt_data = srt_data.split("\n\n")
-        print(fmt_srt_data[:5])
         fmt_srt_data = [x.strip() for x in fmt_srt_data]
-        print(fmt_srt_data[:5])
         fmt_srt_data = list(filter(lambda x: x != "", fmt_srt_data))
-        print(fmt_srt_data[:5])
         fmt_srt_data = list(
             map(lambda x: list(filter(lambda y: y != "", x.split("\n"))), fmt_srt_data))
-        print(fmt_srt_data[:5])
         fmt_srt_data = list(
             map(lambda x: [x[0], x[1], "\n".join(x[2:])], fmt_srt_data))
-        print(fmt_srt_data[:5])
         fmt_srt_data = list(map(lambda x: [
             x[0],
             seconds(parse_timestamp_date(x[1].split(" --> ")[0])),
             seconds(parse_timestamp_date(x[1].split(" --> ")[1])),
             x[2]
         ], fmt_srt_data))
-        print(fmt_srt_data[:5])
 
         result = {}
         result["text"] = "".join([x[3] for x in fmt_srt_data])
