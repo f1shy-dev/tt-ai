@@ -66,9 +66,11 @@ def transcribe_video(
             '-sow',
             *whisper_cpp_args
         ]
+        print_comm = command.copy()
+        print_comm[4] = "/path/to/audio.wav"
         console.log(
-            f"[grey46]Running whisper.cpp...\n> {' '.join(command)}")
-        output = subprocess.run(command, capture_output=True)
+            f"[grey46]Running whisper.cpp...\n$ {' '.join(print_comm)}")
+        output = subprocess.run(command, capture_output=False)
         if output.returncode != 0:
             raise Exception(
                 f"whisper.cpp failed with return code {output.returncode}\n{output.stderr.decode('utf-8')}")
