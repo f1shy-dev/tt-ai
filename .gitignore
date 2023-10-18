@@ -9,3 +9,5 @@ __pycache__/
 build/
 testing-dl/
 *urls.txt
+
+credentials.json

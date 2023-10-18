@@ -30,6 +30,15 @@ def main():
     parser.add_argument("--whisper-into-memory", action="store_true", default=False,
                         help="Whether to load the whisper model into memory.")
 
+    parser.add_argument("--whisper-cpp-path", type=str, default=None, metavar="PATH",
+                        help="The path to the whisper C++ executable to use for transcribing audio.")
+
+    parser.add_argument("--whisper-cpp-threads", type=int, default=8, metavar="N",
+                        help="The number of threads to use for the whisper C++ executable.")
+
+    parser.add_argument("--whisper-cpp-args", type=str, default=[], nargs="*", metavar="ARG",
+                        help="Additional arguments to pass to the whisper C++ executable.")
+
     parser.add_argument("--whisper-device", type=str, choices=["cpu", "cuda", "mps"],
                         default="cpu", help="The torch device to use for running the whisper transcription model.")
 
@@ -70,7 +79,10 @@ def main():
         skip_clip_if_cached=("clip" in args.skip_if_exists),
         skip_transcription_if_cached=("transcribe" in args.skip_if_exists),
         max_chars_per_sub_chunk=args.max_chars_per_sub_chunk,
-        spotify_credentials=(args.spotify_user, args.spotify_password)
+        spotify_credentials=(args.spotify_user, args.spotify_password),
+        whisper_cpp_path=args.whisper_cpp_path,
+        whisper_cpp_threads=args.whisper_cpp_threads,
+        whisper_cpp_args=args.whisper_cpp_args
     )
 
     for video_url in args.videos:

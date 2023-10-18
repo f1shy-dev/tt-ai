@@ -1,6 +1,6 @@
 import os
 from ..analysis import AnalysisProvider
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import torch
 from .download_video import download_video, download_video_info, VideoInfo
 from .download_spotify import download_spotify, download_spotify_info
@@ -27,7 +27,7 @@ class Farm:
     whisper_into_memory: bool = False
     whisper_cpp_path: str | None = None
     whisper_cpp_threads: int = 8
-    whisper_cpp_args: list[str] = []
+    whisper_cpp_args: list[str] = field(default_factory=list)
     torch_device: str = detect_device()
 
     skip_analysis_if_cached: bool = True
