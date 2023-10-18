@@ -57,67 +57,68 @@ def transcribe_video(
         return
 
     if whisper_cpp_path is not None:
+
+        command = [
+            whisper_cpp_path,
+            '-m', whisper_model,
+            '-f', audio_path,
+            '-osrt',
+            '-t', str(whisper_cpp_threads),
+            '--max-len', '1',
+            '-sow',
+            *whisper_cpp_args
+        ]
+        print_comm = command.copy()
+        print_comm[4] = "/path/to/audio.wav"
+        console.log(
+            f"[grey46]$ {' '.join(print_comm)}")
+
         with Progress(
             SpinnerColumn(),
             TextColumn("{task.description}"),
-            "•",
             TimeElapsedColumn(),
             "[progress.elapsed]elapsed",
             transient=True,
         ) as progress:
             task = progress.add_task(
                 "[white]Transcribing audio with whisper.cpp...", total=1)
-
-            command = [
-                whisper_cpp_path,
-                '-m', whisper_model,
-                '-f', audio_path,
-                '-osrt',
-                '-t', str(whisper_cpp_threads),
-                '--max-len', '1',
-                '-sow',
-                *whisper_cpp_args
-            ]
-            print_comm = command.copy()
-            print_comm[4] = "/path/to/audio.wav"
-            console.log(
-                f"[grey46]$ {' '.join(print_comm)}")
             output = subprocess.run(command, capture_output=True)
             if output.returncode != 0:
                 raise Exception(
                     f"whisper.cpp failed with return code {output.returncode}\n{output.stderr.decode('utf-8')}")
-            console.log("[grey46]Loading whisper.cpp output...")
-            out_srt_path = os.path.join(
-                video_folder, f'{video.video_id}.wav.srt')
-            with open(out_srt_path, "r", encoding="utf-8") as srt_file:
-                srt_data = srt_file.read()
-
-            def seconds(x): return x[0] * 3600 + x[1] * 60 + x[2]
-            fmt_srt_data = srt_data.split("\n\n")
-            fmt_srt_data = [x.strip() for x in fmt_srt_data]
-            fmt_srt_data = list(filter(lambda x: x != "", fmt_srt_data))
-            fmt_srt_data = list(
-                map(lambda x: list(filter(lambda y: y != "", x.split("\n"))), fmt_srt_data))
-            fmt_srt_data = list(
-                map(lambda x: [x[0], x[1], "\n".join(x[2:])], fmt_srt_data))
-            fmt_srt_data = list(map(lambda x: [
-                x[0],
-                seconds(parse_timestamp_date(x[1].split(" --> ")[0])),
-                seconds(parse_timestamp_date(x[1].split(" --> ")[1])),
-                x[2]
-            ], fmt_srt_data))
-
-            result = {}
-            result["text"] = "".join([x[3] for x in fmt_srt_data])
-            result["segments"] = []
-            for chunk in fmt_srt_data:
-                result["segments"].append({
-                    "start": chunk[1],
-                    "end": chunk[2],
-                    "text": chunk[3],
-                    "words": [{"word": chunk[3], "start": chunk[1], "end": chunk[2]}]
-                })
             progress.update(task, advance=1)
+        console.log("[grey46]Loading whisper.cpp output...")
+        out_srt_path = os.path.join(
+            video_folder, f'{video.video_id}.wav.srt')
+        with open(out_srt_path, "r", encoding="utf-8") as srt_file:
+            srt_data = srt_file.read()
+
+        def seconds(x): return x[0] * 3600 + x[1] * 60 + x[2]
+        fmt_srt_data = srt_data.split("\n\n")
+        fmt_srt_data = [x.strip() for x in fmt_srt_data]
+        fmt_srt_data = list(filter(lambda x: x != "", fmt_srt_data))
+        fmt_srt_data = list(
+            map(lambda x: list(filter(lambda y: y != "", x.split("\n"))), fmt_srt_data))
+        fmt_srt_data = list(
+            map(lambda x: [x[0], x[1], "\n".join(x[2:])], fmt_srt_data))
+        fmt_srt_data = list(map(lambda x: [
+            x[0],
+            seconds(parse_timestamp_date(x[1].split(" --> ")[0])),
+            seconds(parse_timestamp_date(x[1].split(" --> ")[1])),
+            x[2]
+        ], fmt_srt_data))
+
+        result = {}
+        result["text"] = "".join([x[3] for x in fmt_srt_data])
+        result["segments"] = []
+        for chunk in fmt_srt_data:
+            result["segments"].append({
+                "start": chunk[1],
+                "end": chunk[2],
+                "text": chunk[3],
+                "words": [{"word": chunk[3], "start": chunk[1], "end": chunk[2]}]
+            })
+
     else:
         console.log(
             f"[grey46]Loading whisper model {whisper_model} on device {torch_device}")
