@@ -101,7 +101,9 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
 
         fmt_srt_data = srt_data.split("\n\n")
         fmt_srt_data = list(filter(lambda x: x != "", fmt_srt_data))
-        fmt_srt_data = list(map(lambda x: x.split("\n"), fmt_srt_data))
+        fmt_srt_data = list(
+            map(lambda x: list(filter(lambda y: y != "", x.split("\n"))), fmt_srt_data))
+
         fmt_srt_data = list(
             map(lambda x: [x[0], x[1], "\n".join(x[2:])], fmt_srt_data))
         fmt_srt_data = list(map(lambda x: [
