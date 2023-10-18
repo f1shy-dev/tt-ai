@@ -11,7 +11,7 @@ dependencies = [
     "yt-dlp",
     "ffmpeg",
     "openai",
-    "torch",
+    # "torch",
     "requests",
     "tiktoken",
     "rich",
