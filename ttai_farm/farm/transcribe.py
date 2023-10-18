@@ -77,7 +77,7 @@ def transcribe_video(
         console.log("[grey46]Loading whisper.cpp output...")
         out_srt_path = os.path.join(video_folder, f'{video.video_id}.wav.srt')
         with open(out_srt_path, "r", encoding="utf-8") as srt_file:
-            srt_data = srt_file.readlines()
+            srt_data = srt_file.read()
 
         fmt_srt_data = srt_data.split("\n\n")
         fmt_srt_data = list(filter(lambda x: x != "", fmt_srt_data))
