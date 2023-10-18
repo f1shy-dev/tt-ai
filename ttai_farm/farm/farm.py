@@ -108,7 +108,10 @@ class Farm:
 
         file = open(os.path.join(
             video_folder, "transcript.sen_chunked.compact.srt"), "r", encoding="utf-8")
-        analysis = self.analysis_provider.analyze(file.read())
+        text_content = file.read()
+        console.log(
+            f"[grey46]Sending {len(text_content)} chars of transcript to analysis provider...")
+        analysis = self.analysis_provider.analyze(text_content)
         if analysis is None or len(analysis) == 0:
             console.print(analysis)
             raise Exception("Analysis provider returned empty analysis")

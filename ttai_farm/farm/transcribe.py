@@ -93,7 +93,7 @@ def transcribe_video(
         with open(out_srt_path, "r", encoding="utf-8") as srt_file:
             srt_data = srt_file.read()
 
-        def seconds(x): return x[0] * 3600 + x[1] * 60 + x[2]
+        def seconds(x): return (x[0] * 3600) + (x[1] * 60) + x[2]
         fmt_srt_data = srt_data.split("\n\n")
         fmt_srt_data = [x.strip() for x in fmt_srt_data]
         fmt_srt_data = list(filter(lambda x: x != "", fmt_srt_data))

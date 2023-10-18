@@ -112,11 +112,11 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
             map(lambda x: [x[0], x[1], "\n".join(x[2:])], fmt_srt_data))
         print(fmt_srt_data[:5])
         fmt_srt_data = list(map(lambda x: [
-            x[0],
-            parse_timestamp_date(x[1].split(" --> ")[0]),
-            parse_timestamp_date(x[1].split(" --> ")[1]),
-            x[2]
-        ], fmt_srt_data))
+            x,
+            parse_timestamp_date(fmt_srt_data[x][1].split(" --> ")[0]),
+            parse_timestamp_date(fmt_srt_data[x][1].split(" --> ")[1]),
+            fmt_srt_data[x][2]
+        ], range(len(fmt_srt_data))))
         print(fmt_srt_data[:5])
 
         if os.path.exists(os.path.join(video_folder, "clipped-srts")):
@@ -135,15 +135,19 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
             if os.path.exists(sub_clip_path):
                 continue
 
-            start_ts = parse_timestamp_date(chunk.start)
-            end_ts = parse_timestamp_date(chunk.end)
+            def seconds(x): return (x[0] * 3600) + (x[1] * 60) + x[2]
+            start_ts = seconds(parse_timestamp_date(chunk.start))
+            end_ts = seconds(parse_timestamp_date(chunk.end))
 
-            start_chunk = filter(
-                lambda x: x[1] <= start_ts <= x[2], fmt_srt_data)
-            start_chunk = list(start_chunk)[0]
+            start_chunk = [x for x in fmt_srt_data if seconds(x[1])
+                           <= start_ts and seconds(x[2]) >= start_ts]
+            print("SC", start_chunk)
+            start_chunk = list(start_chunk).pop()
 
-            end_chunk = filter(lambda x: x[1] <= end_ts <= x[2], fmt_srt_data)
-            end_chunk = list(end_chunk)[0]
+            end_chunk = [x for x in fmt_srt_data if seconds(x[1])
+                         <= end_ts and seconds(x[2]) >= end_ts]
+            print("EC", end_chunk)
+            end_chunk = list(end_chunk).pop()
 
             sub_srt_data = fmt_srt_data[int(
                 start_chunk[0]) - 1:int(end_chunk[0]) - 1]
@@ -218,7 +222,7 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
                 "watermarks/km-watermark.png",
                 "-filter_complex",
                 # center watermark, make it 512x512 (image is 1024x1024)
-                "[1]scale=304:304[wm];[0][wm]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2+100",
+                "[1]scale=304:304[wm];[0][wm]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2+200",
 
                 "-c:a",
                 "copy",
