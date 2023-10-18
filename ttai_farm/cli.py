@@ -24,8 +24,9 @@ def main():
     parser.add_argument("--analysis-model", type=str,
                         help="The analysis model ID/name to use if using 'openai' or 'poe' for analysis.")
 
+# //, choices=whisper.available_models()
     parser.add_argument("--whisper-model", type=str,
-                        default="small.en", help="The whisper model to use.", choices=whisper.available_models())
+                        default="small.en", help="The whisper model to use.")
 
     parser.add_argument("--whisper-into-memory", action="store_true", default=False,
                         help="Whether to load the whisper model into memory.")
