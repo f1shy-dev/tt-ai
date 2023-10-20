@@ -30,11 +30,13 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
     if not os.path.exists(analysis_path):
         raise FileNotFoundError(f"Analysis file not found: {analysis_path}")
 
-    paths = [[video_folder, "clips"], [video_folder, "sub-clips"],
+    paths = [[video_folder, "clips"], [video_folder, "crop-clips"], [video_folder, "sub-clips"],
              [workspace_dir, "clips", video_info.folder_name()]]
     hasPrinted = False
     for path in paths:
-        if os.path.exists(os.path.join(*path)) and not skip_clip_if_cached:
+        if not os.path.exists(os.path.join(*path)):
+            os.makedirs(os.path.join(*path), exist_ok=True)
+        elif not skip_clip_if_cached:
             if not hasPrinted:
                 hasPrinted = True
                 console.log("[grey46]Removing cached clips...")
@@ -66,6 +68,8 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
         for i, chunk in enumerate(analysis):
             clip_path = os.path.join(
                 video_folder, "clips", f"{i:03d}.mp4")
+            crop_path = os.path.join(
+                video_folder, "crop-clips", f"{i:03d}.mp4")
 
             if os.path.exists(clip_path):
                 continue
@@ -75,12 +79,21 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
                 "ffmpeg", "-y", "-i", video_path,
                 "-ss", chunk.start,
                 "-to", chunk.end,
-                "-vf", "crop=ih*(9/16):ih",
                 "-c:a", "copy",
+                "-c:v", "copy",
                 clip_path,
             ]
             output = subprocess.run(command,  capture_output=True)
             assert output.returncode == 0, f"Failed to clip video: {output.stderr.decode('utf-8')}"
+
+            crop_command = [
+                "ffmpeg", "-y", "-i", clip_path,
+                "-vf", "crop=ih*(9/16):ih",
+                "-c:a", "copy",
+                crop_path,
+            ]
+            crop_output = subprocess.run(crop_command,  capture_output=True)
+            assert output.returncode == 0, f"Failed to crop video: {crop_output.stderr.decode('utf-8')}"
             progress.update(main_bar, advance=1)
     console.log(
         f"[grey46]Cropped {len(analysis)} clips for video '{video_info.extractor}-{video_info.video_id}'")
