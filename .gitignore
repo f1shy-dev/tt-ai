@@ -11,3 +11,7 @@ testing-dl/
 *urls.txt
 
 credentials.json
+
+.env
+.env.*
+!.env.example
