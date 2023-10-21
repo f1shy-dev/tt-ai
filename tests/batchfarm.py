@@ -17,7 +17,15 @@ farm = Farm(
 )
 
 videos = [
-    'spotify:show:66edV3LAbUXa26HG1ZQaKB'
+    # 'https://open.spotify.com/episode/3pdAvrBlzzZWbkriWjZmSd?si=ByW5Q0yqTLGaXPfnH6EloA'
+    'https://open.spotify.com/episode/6OwITXMGgY0mVCGdKRJrYr',
+    'https://open.spotify.com/episode/6fppkhPnw5PCspRVGhZhOG',
+    'https://open.spotify.com/episode/62tozdFpzt1iSmia1KlCfm',
+    'https://open.spotify.com/episode/07TNGl4VKA4UfM4wFehiGD',
+    'https://open.spotify.com/episode/5EFrNB3hEU3yjFcuPhBCeF',
+    'https://open.spotify.com/episode/3DQfcTY4viyXsIXQ89NXvg',
+    'https://open.spotify.com/episode/41RxLAMSdaAd97OAFEpG3H',
+    'https://open.spotify.com/episode/7elrOcatC8aOTKARyZT1EF'
 ]
 
 console.clear()

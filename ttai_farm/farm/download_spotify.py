@@ -188,7 +188,6 @@ def download_spotify(workspace_dir: str, skip_dl_video_if_cached: bool, video_in
                 f"Converted audio from video '{video_info.extractor}-{video_info.video_id}' as wav@16khz")
 
     if not os.path.exists(combined_path):
-        print(combined_path)
         with status(
                 f"Combining video and audio into one file with ffmpeg"):
             command = [
