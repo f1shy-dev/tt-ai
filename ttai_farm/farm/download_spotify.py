@@ -26,7 +26,7 @@ def download_spotify_info(workspace_dir: str, skip_dl_video_if_cached: bool, url
         # access_token = session.tokens().get("playlist-read")
         # console.log("got access token", access_token)
         match = re.search(
-            r'(show\/|episode\/|show:)([A-Za-z0-9]+)', url).group(2)
+            r'(show\/|episode\/|show:|episode:)([A-Za-z0-9]+)', url).group(2)
         assert match, "Couldn't determine your url..."
         ep = EpisodeId.from_base62(match)
 
@@ -42,7 +42,7 @@ def download_spotify_info(workspace_dir: str, skip_dl_video_if_cached: bool, url
             .send("GET", f"/manifests/v7/json/sources/{hex_id}/options/supports_drm", None, None)
 
         v_info = VideoInfo(
-            extractor='spotify-show', video_id=url.split("/")[-1], video_url=url)
+            extractor='spotify-show', video_id=match, video_url=url)
 
         v_folder = os.path.join(
             workspace_dir, 'cache', v_info.folder_name())

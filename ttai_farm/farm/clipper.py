@@ -113,24 +113,24 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
             f"Adding subtitiles to clips for video '{video_info.extractor}-{video_info.video_id}'...", total=len(analysis))
 
         fmt_srt_data = srt_data.split("\n\n")
-        print(fmt_srt_data[:5])
+        # print(fmt_srt_data[:5])
         fmt_srt_data = [x.strip() for x in fmt_srt_data]
-        print(fmt_srt_data[:5])
+        # print(fmt_srt_data[:5])
         fmt_srt_data = list(filter(lambda x: x != "", fmt_srt_data))
-        print(fmt_srt_data[:5])
+        # print(fmt_srt_data[:5])
         fmt_srt_data = list(
             map(lambda x: list(filter(lambda y: y != "", x.split("\n"))), fmt_srt_data))
-        print(fmt_srt_data[:5])
+        # print(fmt_srt_data[:5])
         fmt_srt_data = list(
             map(lambda x: [x[0], x[1], "\n".join(x[2:])], fmt_srt_data))
-        print(fmt_srt_data[:5])
+        # print(fmt_srt_data[:5])
         fmt_srt_data = list(map(lambda x: [
             x,
             parse_timestamp_date(fmt_srt_data[x][1].split(" --> ")[0]),
             parse_timestamp_date(fmt_srt_data[x][1].split(" --> ")[1]),
             fmt_srt_data[x][2]
         ], range(len(fmt_srt_data))))
-        print(fmt_srt_data[:5])
+        # print(fmt_srt_data[:5])
 
         if os.path.exists(os.path.join(video_folder, "clipped-srts")):
             for file in os.listdir(os.path.join(video_folder, "clipped-srts")):
@@ -140,7 +140,7 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
 
         for i, chunk in enumerate(analysis):
             og_clip_path = os.path.join(
-                video_folder, "clips", f"{i:03d}.mp4")
+                video_folder, "crop-clips", f"{i:03d}.mp4")
 
             sub_clip_path = os.path.join(
                 # clip_folder, f"{i:03d}-sub.mp4")
@@ -154,12 +154,12 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
 
             start_chunk = [x for x in fmt_srt_data if seconds(x[1])
                            <= start_ts and seconds(x[2]) >= start_ts]
-            print("SC", start_chunk)
+            # print("SC", start_chunk)
             start_chunk = list(start_chunk).pop()
 
             end_chunk = [x for x in fmt_srt_data if seconds(x[1])
                          <= end_ts and seconds(x[2]) >= end_ts]
-            print("EC", end_chunk)
+            # print("EC", end_chunk)
             end_chunk = list(end_chunk).pop()
 
             sub_srt_data = fmt_srt_data[int(
@@ -181,7 +181,7 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
                 sub_srt_file.write("\n\n".join(list(map(lambda x: "\n".join(
                     [str(int(x[0]) - num_offset + 1), f"{fmt_ts(x[1])} --> {fmt_ts(x[2])}", x[3]]), sub_srt_data))))
 
-            sub_style = "Alignment=6,Fontname=Dela Gothic One,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=160,Fontsize=16"
+            sub_style = "Alignment=6,Fontname=Dela Gothic One,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=180,Fontsize=16"
             # command = f"ffmpeg -y -i \"{og_clip_path}\" -vf 'subtitles=\"{srt_path}\":force_style=\"{sub_style}\"' \"{sub_clip_path}\""
             command = [
                 "ffmpeg",

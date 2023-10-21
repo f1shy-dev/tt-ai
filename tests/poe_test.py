@@ -1,7 +1,7 @@
 # from ttai_farm.analysis import PoeAnalysisProvider
 # from ttai_farm.console import console
 # farm = PoeAnalysisProvider(
-#     bot_name="chinchilla", poe_api_token="cTbKZ0iI_gYQY_kU68GxJQ==")
+#     bot_name="chinchilla", poe_api_token="")
 # data = farm.analyze("""[0:00:00.000 --> 0:00:02.620] The Joe Rogan Experience.
 # [0:00:02.900 --> 0:00:06.280] But I want to talk about chat GPT.
 # [0:00:06.900 --> 0:00:07.360] Hmm.

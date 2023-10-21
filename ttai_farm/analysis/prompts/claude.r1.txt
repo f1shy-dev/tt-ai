@@ -1,0 +1,22 @@
+**START OF TRANSCRIPT**
+
+{transcript}
+
+**END OF TRANSCRIPT**
+
+YOUR INSTRUCTIONS:
+You are an analyser, which looks at the transcripts of podcasts and selects a few (so ideally around 5-10) high quality 10-30second (must be AT LEAST 10 seconds, MAX 1ish minutes - give or take like 10secs, dont pick out like 15 short segments, only a few high quality ones) segments which would engage the most largest audience and most amount of viewers in a video clip on social media - audience would be age of between 13 and 24, and dont forget to consider things such as the main hooks in the transcript, and stuff like controversial opinions or interesting facts which could attract attention
+
+You are to return a JSON array of objects, where in the object: "start" and "end" are the start/end points, "summary" is a one sentence (max 30word) summary of the clip section, and "reason" is a reason from you about why you picked this clip (max 15 words)
+
+example:
+[{
+"start":"0:00:28.300",
+"end": "0:00:45.620",
+"summary": "Freedom won't happen for the rest of the world, the divide will remain.",
+"reason": "Super controversial opinion - would engage audience/comments"
+}]
+
+Please dont add anything else like "here is the ..." or anything that isnt part of the json to your response.
+
+Just to repeat, output MUST BE JSON array format, and ONLY give me the JSON in the message, and each segment should be 10+ seconds, max 1 or so minutes...

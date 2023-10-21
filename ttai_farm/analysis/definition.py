@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 
 class AnalysisProvider:
@@ -10,5 +11,7 @@ class AnalysisProvider:
 class AnalysisChunk:
     start: str
     end: str
-    summary: str
-    reason: str
+    reason: Optional[str] = None
+    title: Optional[str] = None
+    summary: Optional[str] = None
+    hashtags: Optional[list[str]] = None

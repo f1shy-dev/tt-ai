@@ -14,7 +14,7 @@ from .clipper import clip_video
 def detect_device():
     if torch.cuda.is_available():
         return "cuda"
-    if torch.backends.mps.is_available():
+    if "mps" in dir(torch.backends) and torch.backends.mps.is_available():
         return "mps"
     return "cpu"
 
@@ -109,8 +109,8 @@ class Farm:
         file = open(os.path.join(
             video_folder, "transcript.sen_chunked.compact.srt"), "r", encoding="utf-8")
         text_content = file.read()
-        console.log(
-            f"[grey46]Sending {len(text_content)} chars of transcript to analysis provider...")
+        # console.log(
+        #     f"[grey46]Sending {len(text_content)} chars of transcript to analysis provider...")
         analysis = self.analysis_provider.analyze(text_content)
         if analysis is None or len(analysis) == 0:
             console.print(analysis)

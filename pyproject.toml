@@ -13,6 +13,7 @@ dependencies = [
     "openai",
     # "torch",
     "requests",
+    "python-dotenv",
     "tiktoken",
     "rich",
     "poe-api-wrapper",

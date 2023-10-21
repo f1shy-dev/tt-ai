@@ -30,6 +30,8 @@ class OpenAIAnalysisProvider(AnalysisProvider):
 
             openai.api_key = self.openai_api_key or os.environ.get(
                 "OPENAI_API_KEY")
+            console.log(
+                f"[grey46]Sending message with {len(system_prompt.split()) + len(text.split())} words, {len(prompt) + len(text)} chars to openai@{self.model}...")
             response = openai.ChatCompletion.create(
                 model=self.model or "gpt-3.5-turbo-16k",
                 messages=[{"role": "system", "content": system_prompt},

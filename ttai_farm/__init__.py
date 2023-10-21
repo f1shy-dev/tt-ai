@@ -1,3 +1,3 @@
 from rich.traceback import install
-from .farm import farm
+from .farm import Farm
 install(show_locals=True)
