@@ -88,10 +88,6 @@ def download_spotify(workspace_dir: str, skip_dl_video_if_cached: bool, video_in
                         os.remove(os.path.join(folder, file_name))
             console.log("[grey46]Removed cached video/audio downloads...")
 
-        # colab detect
-        RunningInCOLAB = 'google.colab' in str(get_ipython()) if hasattr(
-            __builtins__, '__IPYTHON__') else False
-
         info_data = json.load(open(info_path, "r", encoding="utf-8"))
         drm_manifest = info_data['drm_manifest']
         profiles = drm_manifest['contents'][0]['profiles']

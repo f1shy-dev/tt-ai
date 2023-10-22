@@ -18,7 +18,7 @@ class PoeAnalysisProvider(AnalysisProvider):
 
     `bot_name` = name of the bot to use for the analysis
         * `a2_100k` = Claude instant (100k)
-        * `a2_200k` = Claude 2 (100k)
+        * `a2_2` = Claude 2 (100k)
         * `a2` = Claude instant (9k)
         * `chinchilla` = ChatGPT (4k)
 

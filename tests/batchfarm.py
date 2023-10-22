@@ -9,11 +9,15 @@ farm = Farm(
     workspace_dir="workspace",
     analysis_provider=PoeAnalysisProvider(
         poe_api_token=os.getenv("POE_API_TOKEN"), prompt="@claude.r3.txt"),
-    whisper_model="base",
+    # ,, bot_name="a2_2"
+    whisper_model="/Users/mobilekraft/Downloads/whisper.cpp/models/ggml-base.en.bin",
     whisper_into_memory=True,
-    torch_device="cpu",
+    torch_device="mps",
     spotify_credentials=(os.getenv("SPOTIFY_USER"),
                          os.getenv("SPOTIFY_PASSWORD")),
+    whisper_cpp_path="/Users/mobilekraft/Downloads/whisper.cpp/main",
+    skip_clip_if_cached=False,
+    whisper_cpp_threads=8,
 )
 
 

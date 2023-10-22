@@ -16,7 +16,7 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
         workspace_dir, 'cache', video_info.folder_name())
 
     video_path = os.path.join(video_folder, f"{video_info.video_id}.mp4")
-    srt_path = os.path.join(video_folder, "transcript.chunked.srt")
+    srt_path = os.path.join(video_folder, "transcript.srt")
     with open(srt_path, "r", encoding="utf-8") as srt_file:
         srt_data = srt_file.read()
     analysis_path = os.path.join(video_folder, "analysis.json")
@@ -157,14 +157,16 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
                            <= start_ts and seconds(x[2]) >= start_ts]
             # print("SC", start_chunk)
             start_chunk = list(start_chunk).pop()
+            # print("SC2", start_chunk)
 
             end_chunk = [x for x in fmt_srt_data if seconds(x[1])
                          <= end_ts and seconds(x[2]) >= end_ts]
             # print("EC", end_chunk)
             end_chunk = list(end_chunk).pop()
+            # print("EC2", end_chunk)
 
             sub_srt_data = fmt_srt_data[int(
-                start_chunk[0]) - 1:int(end_chunk[0]) - 1]
+                start_chunk[0]):int(end_chunk[0])+1]
 
             sub_srt_path = os.path.join(
                 srtclip_folder, f"{i:03d}-{chunk.start.replace(':', '_')}-{chunk.end.replace(':', '_')}.srt")
@@ -182,7 +184,7 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
                 sub_srt_file.write("\n\n".join(list(map(lambda x: "\n".join(
                     [str(int(x[0]) - num_offset + 1), f"{fmt_ts(x[1])} --> {fmt_ts(x[2])}", x[3]]), sub_srt_data))))
 
-            sub_style = "Alignment=6,Fontname=Dela Gothic One,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=180,Fontsize=16"
+            sub_style = "Alignment=6,Fontname=Dela Gothic One,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=170,Fontsize=16"
             # command = f"ffmpeg -y -i \"{og_clip_path}\" -vf 'subtitles=\"{srt_path}\":force_style=\"{sub_style}\"' \"{sub_clip_path}\""
             command = [
                 "ffmpeg",
