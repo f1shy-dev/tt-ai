@@ -15,6 +15,18 @@ class PoeAnalysisProvider(AnalysisProvider):
         * If starting with `@`, it will be treated as a file path from `./prompts/`
         * If starting with `#`, it will be treated as a file path as-is
         * Otherwise, it will be treated as a string literal
+
+    `bot_name` = name of the bot to use for the analysis
+        * `a2_100k` = Claude instant (100k)
+        * `a2_200k` = Claude 2 (100k)
+        * `a2` = Claude instant (9k)
+        * `chinchilla` = ChatGPT (4k)
+
+    `poe_api_token` = token used to login to Poe. To obtain:
+        * Login to [poe.com](https://poe.com) in browser
+        * Open devtools on [quora.com](https://quora.com) (same browser)
+        * Go to Application > Cookies
+        * Value of the `m-b` cookie is your token!
     """
     poe_api_token: str = os.environ.get("POE_API_TOKEN")
     bot_name: str = "a2_100k"
