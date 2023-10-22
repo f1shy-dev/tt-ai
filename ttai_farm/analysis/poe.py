@@ -11,9 +11,9 @@ from ttai_farm.console import status, console
 @dataclass
 class PoeAnalysisProvider(AnalysisProvider):
     """
-    "prompt" = prompt to use for the analysis. The string "{transcript}" will be replaced with the transcript of the video.
-        * If starting with @, it will be treated as a file path from ./prompts/
-        * If starting with #, it will be treated as a file path as-is
+    `prompt` = prompt to use for the analysis. The string "`{transcript}`" will be replaced with the transcript of the video.
+        * If starting with `@`, it will be treated as a file path from `./prompts/`
+        * If starting with `#`, it will be treated as a file path as-is
         * Otherwise, it will be treated as a string literal
     """
     poe_api_token: str = os.environ.get("POE_API_TOKEN")
