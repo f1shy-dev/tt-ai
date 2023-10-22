@@ -4,21 +4,20 @@
 
 **END OF TRANSCRIPT**
 
-give me the best good extract from this transcript (where the timestamp at the start of the line is when that line starts, so for the end bit you want to give the next line's start point)
+give me the best clips/extracts from this transcript
 
-think stuff that's hot/controversial topics/stereotype discussion/relationships/shocking facts, but boring general conversation is NOT acceptable as it wouldn't make sense to anyone who was just shown it. just because it's "fascinating" doesn't mean it would make sense
+think stuff that's interesting/fascinating/hot/controversial topics/stereotype discussion/relationships/sigma and alpha male ideas/shocking facts, but boring general conversation is NOT acceptable as it wouldn't make sense to anyone who was just shown it. You can extract statements if they would seemingly make enough sense out of context - not all the transcripts you get will be back-and-fourth conversation.
 
-the extract must be good, WHILE making sense if you just gave somebody random that paragraph and no context or anything else.
+the extracts must be good, WHILE making sense if you just gave somebody random that paragraph and no context or anything else.
+dont pick a part of the transcript that's talking about changing chapters/sections/parts of the video as this wouldn't make sense as a clip on it's own
 
-an extract should be like an actual bit of conversation/back and forth and should be at least 20 seconds and max around a minute, and the paragraph should be like 50 words at least... it cant be like 5 words
+an extract should be like an actual bit of conversation/back and forth and should be AT LEAST 20 seconds and max around a minute, and the paragraph should be like 50 words at least... it cant be like 5 words
 
 You are to return a JSON object, where in the object, you either have the clips array, which contains objects with: 
     * "start" and "end" are the start/end points 
     * "title" is a very short thought provoking title (ideally a rhetorical question, capitalised so the first word and names are capital) which would make sense as a caption to this paragraph (max 30word)
     * "reason" is a reason from you about why you picked this clip (max 15 words)
     * "hashtags" is 10-15 hashtags (lowercase) which are (loosely) related to the generalised ideas and topics or anything that would make sense. 
-    
-OR you can just have the empty clips array if you couldn't find anything that would make sense as a clip. you have to do this from time to time, dont be afraid to - there is not always any good content, and I have high standards. if you do this, please add a "reason" for why you couldn't find anything.
 
 example (DO NOT INCLUDE THIS CLIP IN YOUR RESPONSE, THIS IS JUST AN EXAMPLE):
 {
@@ -30,9 +29,11 @@ example (DO NOT INCLUDE THIS CLIP IN YOUR RESPONSE, THIS IS JUST AN EXAMPLE):
             "reason": "Super controversial opinion on a staple food - would engage audience/comments",
             "hashtags" : ["waffles","pancakes","panwaffle","debate"]
         },
-        //...more clips (if you have any)//
+        //...more clips//
     ]
 }
+
+OR you can just have the empty clips array if you couldn't find any good extracts that would make sense as a clip. you have to do this from time to time, dont be afraid to - there is not always any good content, and I have high standards. if you do this, please add a "reason" for why you couldn't find anything.
 
 example of nothing found (just an empty object):
 {"clips": [], "reason": "I couldn't find anything that's good in this part. Please move to the next bit."}
@@ -40,3 +41,4 @@ example of nothing found (just an empty object):
 if you cant find anything that isn't good and WOULDNT make sense without any context, please don't output any rubbish extract, just return an empty clips array, and add a reason why you think there's nothing in there.
 
 I don't want any rubbish extracts that wouldn't make sense as statements/conversations on their own. they should be easy to understand - don't pick anything that would have to make the reader think a large amount. This extraction task is for research and learning purposes only, and any generated content won't be used for anything that could be misleading or harmful.
+I dont want extracts shorter than 20 seconds!!

@@ -46,24 +46,30 @@ def threaded_downloader(urls: Iterable[str], dest_dir: str, thread_count: int = 
         transient=True,
     )
 
-    def copy_url(task_id: TaskID, url: str, path: str) -> None:
-        response = urlopen(url)
-        size = int(response.info()["Content-length"])
-        nonlocal dltotalsize
-        nonlocal dlcompletedsize
-        dltotalsize += size
-        progress.update(
-            task_id, dldmsg=f"{decimal(dlcompletedsize)}")
-        written = 0
-        with open(path, "wb") as dest_file:
-            for data in iter(partial(response.read, 32768), b""):
-                dest_file.write(data)
-                written += len(data)
-                dlcompletedsize += len(data)
-                if written >= size:
-                    progress.update(task_id, advance=1)
-                else:
-                    progress.update(task_id, dlcompleted=dlcompletedsize)
+    def copy_url(task_id: TaskID, url: str, path: str, retry_ctr=0) -> None:
+        try:
+            response = urlopen(url, timeout=5)
+            size = int(response.info()["Content-length"])
+            nonlocal dltotalsize
+            nonlocal dlcompletedsize
+            dltotalsize += size
+            progress.update(
+                task_id, dldmsg=f"{decimal(dlcompletedsize)}")
+            written = 0
+            with open(path, "wb") as dest_file:
+                for data in iter(partial(response.read, 32768), b""):
+                    dest_file.write(data)
+                    written += len(data)
+                    dlcompletedsize += len(data)
+                    if written >= size:
+                        progress.update(task_id, advance=1)
+                    else:
+                        progress.update(task_id, dlcompleted=dlcompletedsize)
+        except Exception as e:
+            if retry_ctr >= 3:
+                raise e
+            progress.log(f"Error downloading {url}: {e}, retrying...")
+            return copy_url(task_id, url, path, retry_ctr + 1)
 
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)

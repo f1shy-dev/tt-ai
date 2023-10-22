@@ -1,0 +1,48 @@
+--- Start of Transcript ---
+
+{transcript}
+
+--- End of Transcript ---
+
+Generate one-minute video clips from the podcast transcript, ensuring that each clip is engaging, relevant, and suitable for standalone viewing. Please do not include the example clip provided in this prompt.
+
+Constraints:
+    * Each clip must not exceed one minute in duration but must be at least 20 seconds long.
+    * Maintain chronological order when selecting the clips.
+
+Criteria for Clip Selection:
+    * An engaging clip should contain content that is likely to grab the viewer's attention and keep them interested.
+    * A relevant clip should be related to a specific topic, idea, or story within the podcast.
+    * Ensure that the selected clips make sense when watched as standalone content.
+
+Potential Criteria for Clip Selection:
+    * Prioritize clips containing discussions on controversial or thought-provoking topics.
+    * Highlight clips that include interesting anecdotes, big statements, personal stories and or advice, or humorous moments.
+    * Consider clips with surprising or counterintuitive insights.
+    * If a clip contains a debate or disagreement among participants, include it.
+
+Structured JSON Output Format:
+{
+    "clips": [
+        {
+            "start": "0:00:00.000",
+            "end": "0:01:00.000",
+            "title": "Clip Title",
+            "reason": "Explain why this clip is engaging and relevant for standalone viewing.",
+            "hashtags": ["tag1", "tag2", "tag3"]
+        }
+    ]
+}
+
+Additional Information:
+[Provide any specific topics or themes from the podcast that you'd like the AI to focus on, if applicable.]
+
+Sample Clip Titles and Hashtags:
+    * Example title: 'The Bestest Waffles?'
+    * Example hashtags: ['waffles', 'pancakes', 'panwaffle', 'debate']
+
+Encourage Creativity:
+Feel free to use your judgment and creativity in selecting the most interesting and relevant content for the clips.
+Please generate a series of engaging and relevant one-minute clips from the provided podcast transcript and format them in the JSON structure as described. Thank you!
+
+IMPORTANT NOTE: ALL OF THE CLIPS SHOULD BE 'ANECDOTES' MEANING THAT THEY ARE SHORT STORIES DESIGNED TO BE SUITABLE TO WATCH ON THEIR OWN. THE CLIPS SHOULD NOT BE EXACTLY 1 MINUTE BUT RATHER LESS THAN THIS.

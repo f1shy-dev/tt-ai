@@ -59,9 +59,10 @@ def download_video(workspace_dir: str, skip_dl_video_if_cached: bool, video_info
 
         if not os.path.exists(video_path):
             with yt_dlp.YoutubeDL({
-                'format': 'mp4/bestvideo+bestaudio',
+                'format': 'bestvideo+bestaudio',
+                'merge_output_format': 'mp4',
                 'outtmpl': video_path,
-                'quiet': True,
+                'quiet': RunningInCOLAB,
                 'no_warnings': True,
                 'noprogress': RunningInCOLAB
             }) as ydl:

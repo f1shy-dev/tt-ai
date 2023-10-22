@@ -10,15 +10,29 @@ from ttai_farm.console import status, console
 
 @dataclass
 class PoeAnalysisProvider(AnalysisProvider):
+    """
+    "prompt" = prompt to use for the analysis. The string "{transcript}" will be replaced with the transcript of the video.
+        * If starting with @, it will be treated as a file path from ./prompts/
+        * If starting with #, it will be treated as a file path as-is
+        * Otherwise, it will be treated as a string literal
+    """
     poe_api_token: str = os.environ.get("POE_API_TOKEN")
     bot_name: str = "a2_100k"
+    prompt: str = "@claude.r3.txt"
 
     def analyze(self, text):
         client = PoeApi(self.poe_api_token or os.environ.get("POE_API_TOKEN"))
         bot = self.bot_name or "a2_100k"
-        file_path = os.path.join(os.path.dirname(
-            __file__), "prompts/claude.r2.txt")
-        prompt = open(file_path, "r").read()
+        if self.prompt.startswith("@"):
+            file_path = os.path.join(os.path.dirname(
+                __file__), f"prompts/{self.prompt[1:]}")
+            prompt = open(file_path, "r").read()
+        elif self.prompt.startswith("#"):
+            file_path = self.prompt[1:]
+            prompt = open(file_path, "r").read()
+        else:
+            prompt = self.prompt
+
         prompt = prompt.replace("{transcript}", text)
         prompt += "\n\n"
 
@@ -53,6 +67,8 @@ class PoeAnalysisProvider(AnalysisProvider):
         # og_length = len(items)
 
         print(response)
+        if "{" not in response and "}" not in response:
+            return []
         # parsed = response.split("{").pop().split("}").pop()
         parsed = re.match(r".*?({.*}).*", response, re.DOTALL).group(1)
         data = json.loads(parsed)
@@ -68,10 +84,10 @@ class PoeAnalysisProvider(AnalysisProvider):
         items = [item for item in items if check_time(seconds(
             item["end"]) - seconds(item["start"]))]
 
-        if len(items) == 0:
-            reason = data["reason"]
-            raise ValueError(
-                "No segments were found that were longer than 10 seconds.\nModel reason: " + reason)
+        # if len(items) == 0:
+        #     reason = data["reason"]
+        #     raise ValueError(
+        #         "No segments were found that were longer than 10 seconds.\nModel reason: " + reason)
 
         if og_length != len(items):
             console.log(

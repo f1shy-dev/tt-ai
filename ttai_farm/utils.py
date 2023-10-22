@@ -83,7 +83,7 @@ def write_chunked_srts(transcript: Iterator[dict], srt_file: TextIO, csrt_file: 
     sentences = []
     sentence = []
     for word in words:
-        if word['word'].endswith('.'):
+        if word['word'].endswith('.') or len(sentence) >= 24:
             sentence.append(word)
             sentences.append(sentence)
             sentence = []

@@ -47,7 +47,8 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
         with open(analysis_path, "r", encoding="utf-8") as afile:
             analysis = json.load(afile)
             if analysis is None or len(analysis) == 0:
-                raise Exception("Analysis file is empty or invalid")
+                # raise Exception("Analysis file is empty or invalid")
+                analysis = []
 
             analysis = [AnalysisChunk(**x) for x in analysis]
 

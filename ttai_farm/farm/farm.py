@@ -114,7 +114,7 @@ class Farm:
         analysis = self.analysis_provider.analyze(text_content)
         if analysis is None or len(analysis) == 0:
             console.print(analysis)
-            raise Exception("Analysis provider returned empty analysis")
+            # raise Exception("Analysis provider returned empty analysis")
 
         console.log(
             f"[white]Saving analysis with {len(analysis)} clips to cache...")
