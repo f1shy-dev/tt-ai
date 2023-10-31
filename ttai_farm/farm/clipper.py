@@ -79,7 +79,7 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
                 "ffmpeg", "-y",
                 "-ss", chunk.start,
                 "-to", chunk.end,
-                 "-i", video_path,
+                "-i", video_path,
                 # "-crf", "18",
                 "-c:a", "copy",
                 "-c:v", "copy",
@@ -157,22 +157,29 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
 
             start_chunk = [x for x in fmt_srt_data if seconds(x[1])
                            <= start_ts and seconds(x[2]) >= start_ts]
-            print("SC", start_chunk, start_ts)
-            start_chunk = list(start_chunk).pop()
-            print("SC2", start_chunk)
+            # print("SC", start_chunk, start_ts)
 
             end_chunk = [x for x in fmt_srt_data if seconds(x[1])
                          <= end_ts and seconds(x[2]) >= end_ts]
-            print("EC", end_chunk, end_ts)
+            # print("EC", end_chunk, end_ts)
+
+            if len(start_chunk) == 0 or len(end_chunk) == 0:
+                # console.log(
+                #     f"[yellow]Could not find segment for clip #{i}, skipping...")
+                analysis[i] = None
+                continue
+            start_chunk = list(start_chunk).pop()
+            # print("SC2", start_chunk)
+
             end_chunk = list(end_chunk).pop()
-            print("EC2", end_chunk)
+            # print("EC2", end_chunk)
 
             sub_srt_data = fmt_srt_data[int(
                 start_chunk[0]):int(end_chunk[0])+1]
 
             sub_srt_path = os.path.join(
                 srtclip_folder, f"{i:03d}-{chunk.start.replace(':', '_')}-{chunk.end.replace(':', '_')}.srt")
-            
+
             first_chunk = sub_srt_data[0]
             num_offset = int(first_chunk[0])
             ts_offset = first_chunk[1]
@@ -188,8 +195,8 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
 
             sub_style = "Alignment=6,Fontname=Dela Gothic One,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=170,Fontsize=16"
             # command = f"ffmpeg -y -i \"{og_clip_path}\" -vf 'subtitles=\"{srt_path}\":force_style=\"{sub_style}\"' \"{sub_clip_path}\""
-            console.log(
-                f"[grey46]Using subtitles from {sub_srt_path}")
+            # console.log(
+            #     f"[grey46]Using subtitles from {sub_srt_path}")
             command = [
                 "ffmpeg",
                 "-y",
@@ -208,7 +215,11 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
             progress.update(main_bar, advance=1)
 
     console.log(
-        f"[grey46]Subtitled {len(analysis)} clips for video '{video_info.extractor}-{video_info.video_id}'")
+        f"[grey46]Subtitled {len(list(filter(lambda x: x is not None, analysis)))} clips for video '{video_info.extractor}-{video_info.video_id}'")
+
+    if None in analysis:
+        console.log(
+            f"[yellow]{len(list(filter(lambda x: x is None, analysis)))} clips were skipped due to missing segments...")
 
     final_clips_folder = os.path.join(
         workspace_dir, "clips", video_info.folder_name())
@@ -231,6 +242,8 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
             watermarked_clip_path = os.path.join(
                 final_clips_folder, f"{i:03d}.mp4")
             if os.path.exists(watermarked_clip_path):
+                continue
+            if not os.path.exists(sub_clip_path):
                 continue
 
             # command = f"ffmpeg -y -i \"{sub_clip_path}\" -i \"{WATERMARK_PATH}\" -filter_complex \"[1]scale=100:100[wm];[0][wm]overlay=10:10\" \"{watermarked_clip_path}\""
