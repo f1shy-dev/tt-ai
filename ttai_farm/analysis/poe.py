@@ -82,9 +82,14 @@ class PoeAnalysisProvider(AnalysisProvider):
         if "{" not in response and "}" not in response:
             return []
         # parsed = response.split("{").pop().split("}").pop()
-        parsed = re.match(r".*?({.*}).*", response, re.DOTALL).group(1)
+        # parsed = re.match(r".*?({.*}).*", response, re.DOTALL).group(1)
+        parsed = re.match(r".*?(({|\[).*(}|\])).*",
+                          response, re.DOTALL).group(1)
         data = json.loads(parsed)
-        items = data["clips"]
+        if "clips" in data:
+            items = data["clips"]
+        else:
+            items = data
         og_length = len(items)
 
         def seconds(x):
