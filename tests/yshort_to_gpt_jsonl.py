@@ -250,7 +250,7 @@ def download_audio_one(url, ydl):
         os.remove(f"{TEMP_DIR}/{url.split('/')[-1]}.webm")
 
 
-def download_threaded(urls, ydl, task, n_threads=8):
+def download_threaded(urls, ydl, adv, n_threads=8):
     q = Queue()
 
     def worker():
@@ -258,7 +258,7 @@ def download_threaded(urls, ydl, task, n_threads=8):
             url = q.get()
             try:
                 download_audio_one(url, ydl)
-                task.advance()
+                adv()
             finally:
                 q.task_done()
 
@@ -268,7 +268,7 @@ def download_threaded(urls, ydl, task, n_threads=8):
         t.start()
 
     for url in urls:
-        q.put(url)
+        q.put(url[0])
 
     q.join()
 
@@ -308,8 +308,9 @@ def main():
         #         assert output.returncode == 0, f"ffmpeg failed: {output.stderr}"
         #         os.remove(f"{TEMP_DIR}/{url.split('/')[-1]}.webm")
         #     progress.advance(task)
-
-        download_threaded(videos, ydl, task)
+        def adv():
+            progress.advance(task)
+        download_threaded(videos, ydl, adv)
 
         task = progress.add_task("Transcribing videos", total=len(videos))
         for url, title in videos:
