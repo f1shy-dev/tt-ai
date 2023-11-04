@@ -156,4 +156,4 @@ def write_ass(transcript: Iterator[dict],
     ass_str += '\n'.join(map(lambda x: dialogue(**x), ass_arr))
 
     # file.write(ass_str)
-    return ass_arr
+    return ass_str
