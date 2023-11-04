@@ -1,3 +1,5 @@
+from threading import Thread
+from queue import Queue
 from ttai_farm.v4.write_ass import write_ass
 import whisperx
 import gc
@@ -238,6 +240,39 @@ model_a, metadata = whisperx.load_align_model(
     language_code='en', device=DEVICE)
 
 
+def download_audio_one(url, ydl):
+    if not os.path.exists(f"{AUDIO_DIR}/{url.split('/')[-1]}.wav"):
+        ydl.download([url])
+        ffmpeg_cmd = f"ffmpeg -i {TEMP_DIR}/{url.split('/')[-1]}.webm -ac 1 -ar 16000 {AUDIO_DIR}/{url.split('/')[-1]}.wav"
+        output = subprocess.run(
+            ffmpeg_cmd.split(" "), capture_output=True)
+        assert output.returncode == 0, f"ffmpeg failed: {output.stderr}"
+        os.remove(f"{TEMP_DIR}/{url.split('/')[-1]}.webm")
+
+
+def download_threaded(urls, ydl, task, n_threads=8):
+    q = Queue()
+
+    def worker():
+        while True:
+            url = q.get()
+            try:
+                download_audio_one(url, ydl)
+                task.advance()
+            finally:
+                q.task_done()
+
+    for i in range(n_threads):
+        t = Thread(target=worker)
+        t.daemon = True
+        t.start()
+
+    for url in urls:
+        q.put(url)
+
+    q.join()
+
+
 def main():
     # download with yt-dlp
     # convert to wav 16khz mono
@@ -247,6 +282,13 @@ def main():
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(AUDIO_DIR, exist_ok=True)
     os.makedirs(TEMP_DIR, exist_ok=True)
+    ydl = yt_dlp.YoutubeDL({
+        'format': 'bestaudio',
+        'outtmpl': f"{TEMP_DIR}/%(id)s.%(ext)s",
+        'quiet': True,
+        'no_warnings': True,
+        'noprogress': True,
+    })
 
     with Progress(
         SpinnerColumn(),
@@ -257,42 +299,40 @@ def main():
     ) as progress:
         task = progress.add_task("Downloading videos", total=len(videos))
 
-        with yt_dlp.YoutubeDL({
-            'format': 'bestaudio',
-            'outtmpl': f"{TEMP_DIR}/%(id)s.%(ext)s",
-            'quiet': True,
-            'no_warnings': True,
-            'noprogress': True,
-        }) as ydl:
-            for url, title in videos:
-                if not os.path.exists(f"{AUDIO_DIR}/{url.split('/')[-1]}.wav"):
-                    ydl.download([url])
-                    ffmpeg_cmd = f"ffmpeg -i {TEMP_DIR}/{url.split('/')[-1]}.webm -ac 1 -ar 16000 {AUDIO_DIR}/{url.split('/')[-1]}.wav"
-                    output = subprocess.run(
-                        ffmpeg_cmd.split(" "), capture_output=True)
-                    assert output.returncode == 0, f"ffmpeg failed: {output.stderr}"
-                    os.remove(f"{TEMP_DIR}/{url.split('/')[-1]}.webm")
+        # for url, title in videos:
+        #     if not os.path.exists(f"{AUDIO_DIR}/{url.split('/')[-1]}.wav"):
+        #         ydl.download([url])
+        #         ffmpeg_cmd = f"ffmpeg -i {TEMP_DIR}/{url.split('/')[-1]}.webm -ac 1 -ar 16000 {AUDIO_DIR}/{url.split('/')[-1]}.wav"
+        #         output = subprocess.run(
+        #             ffmpeg_cmd.split(" "), capture_output=True)
+        #         assert output.returncode == 0, f"ffmpeg failed: {output.stderr}"
+        #         os.remove(f"{TEMP_DIR}/{url.split('/')[-1]}.webm")
+        #     progress.advance(task)
 
-                if not os.path.exists(f"{AUDIO_DIR}/{url.split('/')[-1]}.wav"):
-                    audio = whisperx.load_audio(
-                        f"{AUDIO_DIR}/{url.split('/')[-1]}.wav")
-                    result = model.transcribe(audio, batch_size=BATCH_SIZE)
-                    print(result["segments"])  # before alignment
-                    result = whisperx.align(
-                        result["segments"], model_a, metadata, audio, DEVICE, return_char_alignments=False)
-                    segs = result['segments']
-                    ass_content = write_ass(segs)
-                    data = {
-                        'transcribe': result,
-                        'ass': ass_content,
-                        'url': url,
-                        'title': title,
-                    }
+        download_threaded(videos, ydl, task)
 
-                    with open(f'{DATA_DIR}/{url.split("/")[-1]}.json', 'w') as f:
-                        f.write(json.dumps(data))
+        task = progress.add_task("Transcribing videos", total=len(videos))
+        for url, title in videos:
+            if not os.path.exists(f"{AUDIO_DIR}/{url.split('/')[-1]}.json"):
+                audio = whisperx.load_audio(
+                    f"{AUDIO_DIR}/{url.split('/')[-1]}.wav")
+                result = model.transcribe(audio, batch_size=BATCH_SIZE)
+                print(result["segments"])  # before alignment
+                result = whisperx.align(
+                    result["segments"], model_a, metadata, audio, DEVICE, return_char_alignments=False)
+                segs = result['segments']
+                ass_content = write_ass(segs)
+                data = {
+                    'transcribe': result,
+                    'ass': ass_content,
+                    'url': url,
+                    'title': title,
+                }
 
-                progress.advance(task)
+                with open(f'{DATA_DIR}/{url.split("/")[-1]}.json', 'w') as f:
+                    f.write(json.dumps(data))
+
+            progress.advance(task)
 
 
 if __name__ == "__main__":
