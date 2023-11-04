@@ -317,7 +317,7 @@ def main():
 
         task = progress.add_task("Transcribing videos", total=len(videos))
         for url, title in videos:
-            if not os.path.exists(f"{AUDIO_DIR}/{url.split('/')[-1]}.json"):
+            if not os.path.exists(f"{DATA_DIR}/{url.split('/')[-1]}.json"):
                 audio = whisperx.load_audio(
                     f"{AUDIO_DIR}/{url.split('/')[-1]}.wav")
                 result = model.transcribe(audio, batch_size=BATCH_SIZE)
@@ -335,7 +335,6 @@ def main():
 
                 with open(f'{DATA_DIR}/{url.split("/")[-1]}.json', 'w') as f:
                     f.write(json.dumps(data))
-
             progress.advance(task)
 
 
