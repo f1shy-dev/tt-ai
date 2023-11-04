@@ -327,7 +327,8 @@ def main():
                     result["segments"], model_a, metadata, audio, DEVICE, return_char_alignments=False)
                 segs = result['segments']
                 ass_content = write_ass(segs)
-                print(f"\n\n\n# {title} #\n{ass_content}")
+                joined = '\n'.join([seg['text'] for seg in result['segments']])
+                print(f"\n\n\n# {title} #\n{joined}")
                 data = {
                     'transcribe': result,
                     'ass': ass_content,
