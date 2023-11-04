@@ -248,6 +248,9 @@ def download_audio_one(url, ydl):
             ffmpeg_cmd.split(" "), capture_output=True)
         assert output.returncode == 0, f"ffmpeg failed: {output.stderr}"
         os.remove(f"{TEMP_DIR}/{url.split('/')[-1]}.webm")
+        console.log(f"[medium_purple3]downloaded {url}")
+    else:
+        console.log(f"[green]exists: {url}")
 
 
 def download_threaded(urls, ydl, adv, n_threads=8):
