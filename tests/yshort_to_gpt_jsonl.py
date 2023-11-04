@@ -321,11 +321,12 @@ def main():
                 audio = whisperx.load_audio(
                     f"{AUDIO_DIR}/{url.split('/')[-1]}.wav")
                 result = model.transcribe(audio, batch_size=BATCH_SIZE)
-                print(result["segments"])  # before alignment
+                # print(result["segments"])  # before alignment
                 result = whisperx.align(
                     result["segments"], model_a, metadata, audio, DEVICE, return_char_alignments=False)
                 segs = result['segments']
                 ass_content = write_ass(segs)
+                print(f"\n\n\n# {title} #\n{ass_content}")
                 data = {
                     'transcribe': result,
                     'ass': ass_content,
