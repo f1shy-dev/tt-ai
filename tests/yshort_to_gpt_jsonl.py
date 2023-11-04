@@ -229,11 +229,11 @@ videos = [
 DATA_DIR = "./yshorts/data"
 AUDIO_DIR = "./yshorts/audio"
 TEMP_DIR = "./yshorts/temp"
-DEVICE = "cpu"
+DEVICE = "cuda"
 BATCH_SIZE = 16  # reduce if low on GPU mem
 # change to "int8" if low on GPU mem (may reduce accuracy)
 COMPUTE_TYPE = "float16"
-MODEL_NAME = 'tiny'
+MODEL_NAME = 'base'
 console.log(f"loading whisperx {MODEL_NAME} model...")
 model = whisperx.load_model(MODEL_NAME, DEVICE, compute_type=COMPUTE_TYPE)
 model_a, metadata = whisperx.load_align_model(
@@ -268,13 +268,13 @@ def download_threaded(urls, ydl, task, n_threads=8):
         t.start()
 
     for url in urls:
-        q.put(url)
+        q.put(url[0])
 
     q.join()
 
 
 def main():
-    # download with yt-dlp
+	    # download with yt-dlp
     # convert to wav 16khz mono
     # transcribe with whisperx
     # save to ./shorts/data/<video_id>.json
