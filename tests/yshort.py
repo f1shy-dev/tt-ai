@@ -25,7 +25,7 @@ COMPUTE_TYPE = "float16"  # float16 if using gpu
 MODEL_NAME = 'base' # jonatasgrosman/wav2vec2-large-xlsr-53-english
 FT_MODEL = "ft:gpt-3.5-turbo-0613:personal::8HNFjrTY"
 ALIGN_MODEL = "WAV2VEC2_ASR_BASE_960H"
-MAX_WORDS_PER_SEG = 3
+MAX_WORDS_PER_SEG = 2
 BACKGROUND_DIR = './workspace/bg-vids'
 OUT_DIR = './workspace/clips/yshort'
 WATERMARK_IMG = "watermarks/f-plug-wm.png"
@@ -200,9 +200,11 @@ for idx, word in enumerate(words):
 console.log("[grey46]Generating subtitle file...")
 ass_content = write_adv_substation_alpha(
     comp_segs,
-    font_size=20,
+    font_size=18,
+    color='D64573',
+    underline=False,
     Fontname='Dela Gothic One',
-    BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='20',
+    BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='18',
     Alignment='5',
     MarginL='10',
     MarginR='10',

@@ -85,7 +85,8 @@ def write_adv_substation_alpha(transcript: Iterator[dict],
             suffmt = r'\r'
     else:
         if not color:
-            color = 'HFF00'
+            # color = 'HFF00'
+            color = 'D64573'
         underline_code = r'\u1' if underline else ''
 
         prefmt = r'{\1c&' + f'{color.upper()}&{underline_code}' + '}'
@@ -145,7 +146,7 @@ def write_adv_substation_alpha(transcript: Iterator[dict],
                     else:
                         building += char
 
-                return [idx for idx, word in words if word == p]
+                return [idx for idx, word in words if word.strip() == p.strip()]
 
             for cdx, crow in res_segs.iterrows():
                 if not np.isnan(crow['start']):
