@@ -41,23 +41,28 @@ with console.status("Collating background videos...") as s:
                 print(vid_duration, os.path.join(BACKGROUND_DIR, video))
                 duration += vid_duration
                 start_time = random.uniform(0, duration - 10)
-                output_cmd = f'ffmpeg -y -ss {start_time} -i {os.path.join(BACKGROUND_DIR, video)} -t 10 -c copy workspace/temp/bg-{idx}.mp4'
-                subprocess.run(output_cmd.split(), capture_output=True)
+                output_cmd = ['ffmpeg', '-y', '-ss', f'{start_time}', '-i', f"'{os.path.join(BACKGROUND_DIR, video)}'", '-t', '10', '-c', 'copy', f"'workspace/temp/bg-{idx}.mp4'"]
+                
+                ffresult = subprocess.run(output_cmd.split(), capture_output=True)
+                assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
 
             elif video.startswith('whole-'):
                 vid_duration = float(ffmpeg.probe(os.path.join(BACKGROUND_DIR, video))['format']['duration'])
                 vid_duration = min(vid_duration, 10)
                 print(vid_duration)
                 duration += vid_duration
-                output_cmd = f'ffmpeg -y -i {os.path.join(BACKGROUND_DIR, video)} -t {duration} -c copy workspace/temp/bg-{idx}.mp4'
-                subprocess.run(output_cmd.split(), capture_output=True)
-            packlist_file.write(f'file bg-{idx}.mp4\n')
+                # output_cmd = f'ffmpeg -y -i {os.path.join(BACKGROUND_DIR, video)} -t {duration} -c copy workspace/temp/bg-{idx}.mp4'
+                output_cmd = ['ffmpeg','-y', '-i' f"'{os.path.join(BACKGROUND_DIR, video)}'", '-t', f"'{duration}'", '-c', 'copy', f"'workspace/temp/bg-{idx}.mp4'"]
+                ffresult = subprocess.run(output_cmd, capture_output=True)
+                assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
             if duration >= 70:
                 break
         packlist_file.close()
     s.update("Merging background videos...")
-    merge_cmd = 'ffmpeg -f concat -safe 0 -i ffmpeg-packlist-bg.txt -c copy workspace/temp/bg-merge.mp4'
-    subprocess.run(merge_cmd.split(), capture_output=True)
+    merge_cmd = ['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', 'ffmpeg-packlist-bg.txt', '-c', 'copy', 'workspace/temp/bg-merge.mp4']
+    ffresult = subprocess.run(merge_cmd, capture_output=True)
+    assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
+
 
 # prompt = """you are generating a script for a social media short/reel about facts.
 # the topic for the facts is just "random/interesting facts".
