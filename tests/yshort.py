@@ -54,15 +54,15 @@ with console.status("Collating background videos...") as s:
                 ffresult = subprocess.run(output_cmd, capture_output=True)
                 assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
 
-            elif video.startswith('whole-'):
-                vid_duration = float(ffmpeg.probe(os.path.join(
-                    BACKGROUND_DIR, video))['format']['duration'])
-                vid_duration = min(vid_duration, 10)
-                duration += vid_duration
-                output_cmd = [
-                    'ffmpeg', '-y', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{duration}', '-c', 'copy', f'workspace/temp/bg-{idx}.mp4']
-                ffresult = subprocess.run(output_cmd, capture_output=True)
-                assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
+            # elif video.startswith('whole-'):
+            #     vid_duration = float(ffmpeg.probe(os.path.join(
+            #         BACKGROUND_DIR, video))['format']['duration'])
+            #     vid_duration = min(vid_duration, 10)
+            #     duration += vid_duration
+            #     output_cmd = [
+            #         'ffmpeg', '-y', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{duration}', '-c', 'copy', f'workspace/temp/bg-{idx}.mp4']
+            #     ffresult = subprocess.run(output_cmd, capture_output=True)
+            #     assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
             packlist_file.write(f"file bg-{idx}.mp4\n")
             if duration >= 70:
                 break
