@@ -135,7 +135,7 @@ def write_adv_substation_alpha(transcript: Iterator[dict],
                         idx_0 = cdx
                         idx_1 = cdx + 1
                     elif resolution == "word":
-                        idxs = find_idx(segment['text'], crow['word'])
+                        idxs = list(find_idx(segment['text'], crow['word']))
                         if crow['word'] in last_idx_map:
                             offset = last_idx_map[crow['word']]
                         else:
