@@ -44,7 +44,7 @@ with console.status("Collating background videos...") as s:
                 output_cmd = ['ffmpeg', '-y', '-ss', f'{start_time}', '-i', f"'{os.path.join(BACKGROUND_DIR, video)}'", '-t', '10', '-c', 'copy', f"'workspace/temp/bg-{idx}.mp4'"]
                 
                 ffresult = subprocess.run(output_cmd, capture_output=True)
-                assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
+                assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
 
             elif video.startswith('whole-'):
                 vid_duration = float(ffmpeg.probe(os.path.join(BACKGROUND_DIR, video))['format']['duration'])
@@ -52,7 +52,7 @@ with console.status("Collating background videos...") as s:
                 duration += vid_duration
                 output_cmd = ['ffmpeg','-y', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{duration}', '-c', 'copy', f'workspace/temp/bg-{idx}.mp4']
                 ffresult = subprocess.run(output_cmd, capture_output=True)
-                assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
+                assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
             packlist_file.write(f"file bg-{idx}.mp4\n")
             if duration >= 70:
                 break
@@ -60,7 +60,7 @@ with console.status("Collating background videos...") as s:
     s.update("Merging background videos...")
     merge_cmd = ['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', 'workspace/temp/ffmpeg-packlist-bg.txt', '-an', '-vf', 'crop=ih*(9/16):ih', '-t', '70', 'workspace/temp/bg-merge.mp4']
     ffresult = subprocess.run(merge_cmd, capture_output=True)
-    assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
+    assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(merge_cmd)}"
 
 
 prompt = """you are generating a script for a social media short/reel about facts.
