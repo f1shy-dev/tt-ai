@@ -201,7 +201,7 @@ console.log("[grey46]Generating subtitle file...")
 ass_content = write_adv_substation_alpha(
     comp_segs,
     font_size=18,
-    color='D64573',
+    color='00FFFF',
     underline=False,
     Fontname='Dela Gothic One',
     BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='18',
