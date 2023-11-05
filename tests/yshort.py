@@ -75,180 +75,180 @@ with console.status("Collating background videos...") as s:
     console.log("Generated background video...")
 
 
-prompt = """you are generating a script for a social media short/reel about facts.
-the topic for the facts is just "random/interesting facts".
-make sure to include:
-    * hooks to social media features like "like and follow for more facts" or "comment your favorite fact below", or "follow since you'll never see me again".
-    * end the video with a form of hook like "and so" then start the video with "here are ..." since the video loops, so it will seem like it's a never ending list of facts to increase watch time
-    * in total, around 10 facts+hooks - minimum 2 hooks
-    * the title of the video - with emojis, ellipses, question marks, exclamation marks, hashtags, etc
+# prompt = """you are generating a script for a social media short/reel about facts.
+# the topic for the facts is just "random/interesting facts".
+# make sure to include:
+#     * hooks to social media features like "like and follow for more facts" or "comment your favorite fact below", or "follow since you'll never see me again".
+#     * end the video with a form of hook like "and so" then start the video with "here are ..." since the video loops, so it will seem like it's a never ending list of facts to increase watch time
+#     * in total, around 10 facts+hooks - minimum 2 hooks
+#     * the title of the video - with emojis, ellipses, question marks, exclamation marks, hashtags, etc
 
-format in JSON like so:
-{
-    "title": "<title>",
-    "content": [
-        {"text": "<fact>", "type": "fact"},
-        {"text": "<fact>", "type": "fact"},
-        {"text": "<hook>", "type": "hook"},
-        //... and so on
-    ]
-}"""
-console.log(f"[grey46]Generating script w/ model {FT_MODEL}...")
-
-
-def gpt_loop(tries=0):
-    response = openai.ChatCompletion.create(
-        model=FT_MODEL,
-        messages=[{"role": "system", "content": prompt}],
-        temperature=0.68,
-        max_tokens=512,
-        frequency_penalty=0.32,
-        presence_penalty=0.12,
-    )
-    usage_tk = response["usage"]
-    prompt_tk = int(usage_tk['prompt_tokens'])
-    comp_tk = int(usage_tk['completion_tokens'])
-    console.log(
-        f"Used {prompt_tk} prompt + {comp_tk} completion ({usage_tk['total_tokens']} total ~ ${(prompt_tk/1000*0.012) + (comp_tk/1000*0.016)}) tokens.")
-    content = response["choices"][0]["message"]["content"]
-
-    try:
-        data = json.loads(content)
-        print(data, file=open('workspace/temp/data.json', 'w'))
-        # if not 'content' in data or not 'title' in data:
-        #     raise ValueError('Content generated is not valid json')
-        return data
-    except Exception as e:
-        if tries > 3:
-            raise ValueError('Content generated is not valid json')
-        else:
-            console.log(
-                f'[red]Content generated is not valid json, trying again ({tries}/3)...')
-            return gpt_loop(tries + 1)
+# format in JSON like so:
+# {
+#     "title": "<title>",
+#     "content": [
+#         {"text": "<fact>", "type": "fact"},
+#         {"text": "<fact>", "type": "fact"},
+#         {"text": "<hook>", "type": "hook"},
+#         //... and so on
+#     ]
+# }"""
+# console.log(f"[grey46]Generating script w/ model {FT_MODEL}...")
 
 
-data = gpt_loop()
-joined = ''
-for idx, line in enumerate(data['content']):
-    if line['text'].strip() == '':
-        continue
-    color = 'red' if line['type'] == 'hook' else 'medium_purple3'
-    joined += f'[{color}]{line["text"]}[/{color}]\n'
+# def gpt_loop(tries=0):
+#     response = openai.ChatCompletion.create(
+#         model=FT_MODEL,
+#         messages=[{"role": "system", "content": prompt}],
+#         temperature=0.68,
+#         max_tokens=512,
+#         frequency_penalty=0.32,
+#         presence_penalty=0.12,
+#     )
+#     usage_tk = response["usage"]
+#     prompt_tk = int(usage_tk['prompt_tokens'])
+#     comp_tk = int(usage_tk['completion_tokens'])
+#     console.log(
+#         f"Used {prompt_tk} prompt + {comp_tk} completion ({usage_tk['total_tokens']} total ~ ${(prompt_tk/1000*0.012) + (comp_tk/1000*0.016)}) tokens.")
+#     content = response["choices"][0]["message"]["content"]
 
-console.print(joined)
-# assert Confirm.ask('Is this script good?')
-
-
-console.log(
-    f"[grey46]Loading models whisperx:{MODEL_NAME}, align:{ALIGN_MODEL}")
-model = whisperx.load_model(
-    MODEL_NAME, DEVICE, compute_type=COMPUTE_TYPE, language='en', threads=16)
-model_a, metadata = whisperx.load_align_model(
-    language_code='en', device=DEVICE, model_name=ALIGN_MODEL)
-
-os.makedirs('workspace/temp', exist_ok=True)
-
-console.log('[grey46]Converting text to speech...')
-joined_tts = '\n'.join([line['text']
-                       for line in data['content'] if line['text'].strip() != ''])
-text_to_speach(joined_tts, f'workspace/temp/tts.mp3')
-
-console.log("[grey46]Loading audio to tensor...")
-audio = whisperx.load_audio(
-    'workspace/temp/tts.mp3')
-
-console.log("Transcribing audio...")
-result = model.transcribe(
-    audio, batch_size=BATCH_SIZE, language='en')
+#     try:
+#         data = json.loads(content)
+#         print(data, file=open('workspace/temp/data.json', 'w'))
+#         # if not 'content' in data or not 'title' in data:
+#         #     raise ValueError('Content generated is not valid json')
+#         return data
+#     except Exception as e:
+#         if tries > 3:
+#             raise ValueError('Content generated is not valid json')
+#         else:
+#             console.log(
+#                 f'[red]Content generated is not valid json, trying again ({tries}/3)...')
+#             return gpt_loop(tries + 1)
 
 
-console.log("Aligning audio...")
-result = whisperx.align(
-    result["segments"], model_a, metadata, audio, DEVICE)
-formatted_segs = result['segments']
-words = []
-comp_segs = []
+# data = gpt_loop()
+# joined = ''
+# for idx, line in enumerate(data['content']):
+#     if line['text'].strip() == '':
+#         continue
+#     color = 'red' if line['type'] == 'hook' else 'medium_purple3'
+#     joined += f'[{color}]{line["text"]}[/{color}]\n'
 
-print(json.dumps(formatted_segs), file=open(
-    'workspace/temp/formatted_segs.json', 'w'))
-for segm in formatted_segs:
-    words += [
-        {
-            "word": w['word'],
-            "start": float(w['start']) if 'start' in w else None,
-            "end": float(w['end']) if 'end' in w else None,
-            "score": float(w['score']) if 'score' in w else None,
-        } for w in segm['words']
-    ]
-has_split = False
-for idx, word in enumerate(words):
-    if idx % MAX_WORDS_PER_SEG == 0:
-        has_split = False
-    if not has_split:
-        if 'start' in word and word['start'] is not None:
-            comp_segs.append({
-                "text": "",
-                "start": word['start'],
-                "end": word['end'],
-                "words": []
-            })
-            has_split = True
-    comp_segs[-1]['text'] += word['word'] + " "
-    comp_segs[-1]['words'].append(word)
-    comp_segs[-1]['end'] = word['end'] if word['end'] is not None else comp_segs[-1]['end']
+# console.print(joined)
+# # assert Confirm.ask('Is this script good?')
 
-console.log("[grey46]Generating subtitle file...")
-ass_content = write_adv_substation_alpha(
-    comp_segs,
-    font_size=18,
-    color='00FFFF',
-    underline=False,
-    Fontname='Dela Gothic One',
-    BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='18',
-    Alignment='5',
-    MarginL='10',
-    MarginR='10',
-    MarginV='10')
 
-with open('./workspace/temp/subs.ass', 'w') as f:
-    f.write(ass_content)
+# console.log(
+#     f"[grey46]Loading models whisperx:{MODEL_NAME}, align:{ALIGN_MODEL}")
+# model = whisperx.load_model(
+#     MODEL_NAME, DEVICE, compute_type=COMPUTE_TYPE, language='en', threads=16)
+# model_a, metadata = whisperx.load_align_model(
+#     language_code='en', device=DEVICE, model_name=ALIGN_MODEL)
 
-with console.status("Merging background video and audio + cropping...") as s:
-    os.makedirs(OUT_DIR, exist_ok=True)
-    ffresult = subprocess.run(['ffmpeg', '-i', './workspace/temp/bg-merge.mp4', '-i', './workspace/temp/tts.mp3', '-y', '-vf', 'crop=ih*(9/16):ih',
-                               '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0', '-shortest', './workspace/temp/bg_with_tts_audio.mp4'], capture_output=True)
-    assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
-    console.log("Merged bg video and audio...")
-    s.update("Burning subs onto video...")
+# os.makedirs('workspace/temp', exist_ok=True)
 
-    now = datetime.datetime.now()
-    current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
+# console.log('[grey46]Converting text to speech...')
+# joined_tts = '\n'.join([line['text']
+#                        for line in data['content'] if line['text'].strip() != ''])
+# text_to_speach(joined_tts, f'workspace/temp/tts.mp3')
 
-    final_output = f"{OUT_DIR}/short_{current_time}.mp4"
+# console.log("[grey46]Loading audio to tensor...")
+# audio = whisperx.load_audio(
+#     'workspace/temp/tts.mp3')
 
-    ffresult = subprocess.run(['ffmpeg', '-i', './workspace/temp/bg_with_tts_audio.mp4',
-                               '-vf', "ass=./workspace/temp/subs.ass:fontsdir='fonts'",
-                               '-y', '-c:a', 'copy', './workspace/temp/subbed.mp4'], capture_output=True)
+# console.log("Transcribing audio...")
+# result = model.transcribe(
+#     audio, batch_size=BATCH_SIZE, language='en')
 
-    assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
-    console.log("Subtitled video...")
 
-    s.update("Watermarking video...")
-    ffresult = subprocess.run([
-        "ffmpeg",
-        "-y",
-        "-i",
-        './workspace/temp/subbed.mp4',
-        "-i",
-        WATERMARK_IMG,
-        "-filter_complex",
-        # center watermark, make it 512x512 (image is 1024x1024)
-        "[1]format=rgba,colorchannelmixer=aa=0.6[logo];[logo][0]scale2ref=oh*mdar:ih*0.15[logo][video];[video][logo]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2+500",
+# console.log("Aligning audio...")
+# result = whisperx.align(
+#     result["segments"], model_a, metadata, audio, DEVICE)
+# formatted_segs = result['segments']
+# words = []
+# comp_segs = []
 
-        "-c:a",
-        "copy",
-        # "crf", "18",
-        final_output
-    ], capture_output=True)
-    assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
-    console.log("Watermarked video...Done!")
+# print(json.dumps(formatted_segs), file=open(
+#     'workspace/temp/formatted_segs.json', 'w'))
+# for segm in formatted_segs:
+#     words += [
+#         {
+#             "word": w['word'],
+#             "start": float(w['start']) if 'start' in w else None,
+#             "end": float(w['end']) if 'end' in w else None,
+#             "score": float(w['score']) if 'score' in w else None,
+#         } for w in segm['words']
+#     ]
+# has_split = False
+# for idx, word in enumerate(words):
+#     if idx % MAX_WORDS_PER_SEG == 0:
+#         has_split = False
+#     if not has_split:
+#         if 'start' in word and word['start'] is not None:
+#             comp_segs.append({
+#                 "text": "",
+#                 "start": word['start'],
+#                 "end": word['end'],
+#                 "words": []
+#             })
+#             has_split = True
+#     comp_segs[-1]['text'] += word['word'] + " "
+#     comp_segs[-1]['words'].append(word)
+#     comp_segs[-1]['end'] = word['end'] if word['end'] is not None else comp_segs[-1]['end']
+
+# console.log("[grey46]Generating subtitle file...")
+# ass_content = write_adv_substation_alpha(
+#     comp_segs,
+#     font_size=18,
+#     color='00FFFF',
+#     underline=False,
+#     Fontname='Dela Gothic One',
+#     BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='18',
+#     Alignment='5',
+#     MarginL='10',
+#     MarginR='10',
+#     MarginV='10')
+
+# with open('./workspace/temp/subs.ass', 'w') as f:
+#     f.write(ass_content)
+
+# with console.status("Merging background video and audio + cropping...") as s:
+#     os.makedirs(OUT_DIR, exist_ok=True)
+#     ffresult = subprocess.run(['ffmpeg', '-i', './workspace/temp/bg-merge.mp4', '-i', './workspace/temp/tts.mp3', '-y', '-vf', 'crop=ih*(9/16):ih',
+#                                '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0', '-shortest', './workspace/temp/bg_with_tts_audio.mp4'], capture_output=True)
+#     assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
+#     console.log("Merged bg video and audio...")
+#     s.update("Burning subs onto video...")
+
+#     now = datetime.datetime.now()
+#     current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
+
+#     final_output = f"{OUT_DIR}/short_{current_time}.mp4"
+
+#     ffresult = subprocess.run(['ffmpeg', '-i', './workspace/temp/bg_with_tts_audio.mp4',
+#                                '-vf', "ass=./workspace/temp/subs.ass:fontsdir='fonts'",
+#                                '-y', '-c:a', 'copy', './workspace/temp/subbed.mp4'], capture_output=True)
+
+#     assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
+#     console.log("Subtitled video...")
+
+#     s.update("Watermarking video...")
+#     ffresult = subprocess.run([
+#         "ffmpeg",
+#         "-y",
+#         "-i",
+#         './workspace/temp/subbed.mp4',
+#         "-i",
+#         WATERMARK_IMG,
+#         "-filter_complex",
+#         # center watermark, make it 512x512 (image is 1024x1024)
+#         "[1]format=rgba,colorchannelmixer=aa=0.6[logo];[logo][0]scale2ref=oh*mdar:ih*0.15[logo][video];[video][logo]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2+500",
+
+#         "-c:a",
+#         "copy",
+#         # "crf", "18",
+#         final_output
+#     ], capture_output=True)
+#     assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
+#     console.log("Watermarked video...Done!")
