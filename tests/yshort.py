@@ -234,8 +234,8 @@ with console.status("Merging background video and audio + cropping...") as s:
     ffresult = subprocess.run([
         "ffmpeg",
         "-y",
-        './workspace/temp/subbed.mp4',
         "-i",
+        './workspace/temp/subbed.mp4',
         "-i",
         WATERMARK_IMG,
         "-filter_complex",
