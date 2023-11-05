@@ -53,11 +53,11 @@ def gpt_loop(tries = 0):
         frequency_penalty=0.32,
         presence_penalty=0.12,
     )
-    usage = response["usage"]
-    prompt = usage['prompt_tokens']
-    comp = usage['completion_tokens']
+    usage_tk = response["usage"]
+    prompt_tk = usage_tk['prompt_tokens']
+    comp_tk = usage_tk['completion_tokens']
     console.log(
-        f"Used {prompt} prompt + {comp} completion ({usage['total_tokens']} total ~ ${(prompt/1000*0.012) + (comp/1000*0.016)}) tokens.")
+        f"Used {prompt_tk} prompt + {comp_tk} completion ({usage_tk['total_tokens']} total ~ ${(prompt/1000*0.012) + (comp_tk/1000*0.016)}) tokens.")
     content = response["choices"][0]["message"]["content"]
 
     try:
