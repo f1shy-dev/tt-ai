@@ -50,7 +50,7 @@ with console.status("Collating background videos...") as s:
                 start_time = random.uniform(0, vid_duration - 15)
                 duration += 15
                 output_cmd = ['ffmpeg', '-y', '-ss', f'{start_time}', '-i',
-                              f'{os.path.join(BACKGROUND_DIR, video)}', '-t', '15', '-c', 'copy', f'workspace/temp/bg-{idx}.mp4']
+                              f'{os.path.join(BACKGROUND_DIR, video)}', '-t', '15', '-vf', 'crop=ih*(9/16):ih', f'workspace/temp/bg-{idx}.mp4']
 
                 ffresult = subprocess.run(output_cmd, capture_output=True)
                 assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
@@ -61,7 +61,7 @@ with console.status("Collating background videos...") as s:
                 vid_duration = min(vid_duration, 10)
                 duration += vid_duration
                 output_cmd = [
-                    'ffmpeg', '-y', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{duration}', '-c', 'copy', f'workspace/temp/bg-{idx}.mp4']
+                    'ffmpeg', '-y', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{duration}', '-vf', 'crop=ih*(9/16):ih', f'workspace/temp/bg-{idx}.mp4']
                 ffresult = subprocess.run(output_cmd, capture_output=True)
                 assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
             packlist_file.write(f"file bg-{idx}.mp4\n")
@@ -70,7 +70,7 @@ with console.status("Collating background videos...") as s:
         packlist_file.close()
     s.update("Merging background videos...")
     merge_cmd = ['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', 'workspace/temp/ffmpeg-packlist-bg.txt',
-                 '-an', '-vf', 'crop=ih*(9/16):ih', '-t', '70', 'workspace/temp/bg-merge.mp4']
+                 '-an', '-v:c', 'copy', '-t', '70', 'workspace/temp/bg-merge.mp4']
     ffresult = subprocess.run(merge_cmd, capture_output=True)
     assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(merge_cmd)}"
     console.log("Generated background video...")
