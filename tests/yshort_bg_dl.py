@@ -1,14 +1,9 @@
 from threading import Thread
 from queue import Queue
-from ttai_farm.v4.write_ass import write_ass
-import whisperx
-import gc
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCompleteColumn
 import os
 import yt_dlp
-import subprocess
 from rich.console import Console
-import json
 console = Console()
 
 
