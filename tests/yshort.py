@@ -38,7 +38,7 @@ with console.status("Collating background videos...") as s:
             s.update(f"Collating background videos... (processing #{idx}/{len(videos)} - at {duration}s duration)")
             if video.startswith('rand-'):
                 vid_duration = ffmpeg.probe(os.path.join(BACKGROUND_DIR, video))['format']['duration']
-                print(vid_duration)
+                print(vid_duration, os.path.join(BACKGROUND_DIR, video))
                 duration += vid_duration
                 start_time = random.uniform(0, duration - 10)
                 output_cmd = f'ffmpeg -y -ss {start_time} -i {os.path.join(BACKGROUND_DIR, video)} -t 10 -c copy workspace/temp/bg-{idx}.mp4'
