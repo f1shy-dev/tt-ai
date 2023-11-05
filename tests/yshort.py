@@ -1,3 +1,4 @@
+import datetime
 import ffmpeg
 import whisperx
 from ttai_farm.v4.write_ass import write_adv_substation_alpha
@@ -25,7 +26,7 @@ FT_MODEL = "ft:gpt-3.5-turbo-0613:personal::8HNFjrTY"
 ALIGN_MODEL = "WAV2VEC2_ASR_BASE_960H" # jonatasgrosman/wav2vec2-large-xlsr-53-english
 MAX_WORDS_PER_SEG = 3
 BACKGROUND_DIR = './workspace/bg-vids'
-
+OUT_DIR = './workspace/clips/yshort'
 console.log("[grey46]Done loading imports...")
 
 # open file for writing packlist
@@ -194,12 +195,19 @@ with open('./workspace/temp/subs.ass', 'w') as f:
     f.write(ass_content)
 
 with console.status("Merging background video and audio + cropping...") as s:
+    os.makedirs(OUT_DIR, exist_ok=True)
     ffresult = subprocess.run(['ffmpeg', '-i', './workspace/temp/bg-merge.mp4', '-i', './workspace/temp/tts.mp3', '-y', '-vf', 'crop=ih*(9/16):ih',
                             '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0', '-shortest', './workspace/temp/bg_with_tts_audio.mp4'], capture_output=True)
     assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
 
     s.update("Burning subs onto video...")
+
+    now = datetime.datetime.now()
+    current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
+
+    final_output = f"{OUT_DIR}/short_{current_time}.mp4"
+
     ffresult = subprocess.run(['ffmpeg', '-i', './workspace/temp/bg_with_tts_audio.mp4',
                             '-vf', "ass=./workspace/temp/subs.ass:fontsdir='fonts'",
-                            '-y', '-c:a', 'copy', './workspace/temp/final.mp4'], capture_output=True)
+                            '-y', '-c:a', 'copy', final_output], capture_output=True)
     assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
