@@ -52,7 +52,7 @@ def write_adv_substation_alpha(transcript: Iterator[dict],
 
     """
 
-    fmt_style_dict = {'Name': 'Default', 'Fontname': 'Arial', 'Fontsize': '48', 'PrimaryColour': '&Hffffff',
+    fmt_style_dict = {'Name': 'Default', 'Fontname': 'Dela Gothing One', 'Fontsize': '16', 'PrimaryColour': '&Hffffff',
                       'SecondaryColour': '&Hffffff', 'OutlineColour': '&H0', 'BackColour': '&H0', 'Bold': '0',
                       'Italic': '0', 'Underline': '0', 'StrikeOut': '0', 'ScaleX': '100', 'ScaleY': '100',
                       'Spacing': '0', 'Angle': '0', 'BorderStyle': '1', 'Outline': '1', 'Shadow': '0',
