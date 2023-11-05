@@ -49,11 +49,8 @@ with console.status("Collating background videos...") as s:
             elif video.startswith('whole-'):
                 vid_duration = float(ffmpeg.probe(os.path.join(BACKGROUND_DIR, video))['format']['duration'])
                 vid_duration = min(vid_duration, 10)
-                print(vid_duration)
                 duration += vid_duration
-                # output_cmd = f'ffmpeg -y -i {os.path.join(BACKGROUND_DIR, video)} -t {duration} -c copy workspace/temp/bg-{idx}.mp4'
                 output_cmd = ['ffmpeg','-y', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{duration}', '-c', 'copy', f'workspace/temp/bg-{idx}.mp4']
-                # print(' '.join(output_cmd))
                 ffresult = subprocess.run(output_cmd, capture_output=True)
                 assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
             packlist_file.write(f"file bg-{idx}.mp4\n")
@@ -61,7 +58,7 @@ with console.status("Collating background videos...") as s:
                 break
         packlist_file.close()
     s.update("Merging background videos...")
-    merge_cmd = ['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', 'workspace/temp/ffmpeg-packlist-bg.txt', '-c', 'copy', 'workspace/temp/bg-merge.mp4']
+    merge_cmd = ['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', 'workspace/temp/ffmpeg-packlist-bg.txt', '-an', '-vf', 'crop=ih*(9/16):ih', '-t', '70', 'workspace/temp/bg-merge.mp4']
     ffresult = subprocess.run(merge_cmd, capture_output=True)
     assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
 
