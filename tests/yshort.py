@@ -248,7 +248,7 @@ comp_segs = []
 # sub_style = "Alignment=6,Fontname=Dela Gothic One,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=170,Fontsize=16"
 
 ass_content = write_adv_substation_alpha(formatted_segs, Fontname='Dela Gothic One',
-                                         BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', MarginV='170', Fontsize='16')
+                                         BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='16')
 
 # console.log("mergging audio")
 # ffresult = subprocess.run(['ffmpeg', '-f', 'concat', '-safe', '0', '-i',
