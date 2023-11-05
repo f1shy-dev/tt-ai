@@ -39,7 +39,7 @@ with console.status("Collating background videos...") as s:
                 duration_cmd = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', os.path.join(BACKGROUND_DIR, video)]
                 duration_output = subprocess.run(duration_cmd, capture_output=True)
                 vid_duration = float(duration_output.stdout)
-                print(vid_duration)
+                print(vid_duration, duration_output)
                 duration += vid_duration
                 start_time = random.uniform(0, duration - 10)
                 output_cmd = f'ffmpeg -y -ss {start_time} -i {os.path.join(BACKGROUND_DIR, video)} -t 10 -c copy workspace/temp/bg-{idx}.mp4'
