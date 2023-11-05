@@ -49,7 +49,7 @@ with console.status("Collating background videos...") as s:
                 duration += vid_duration
                 start_time = random.uniform(0, duration - 10)
                 output_cmd = ['ffmpeg', '-y', '-ss', f'{start_time}', '-i',
-                              f"'{os.path.join(BACKGROUND_DIR, video)}'", '-t', '10', '-c', 'copy', f"'workspace/temp/bg-{idx}.mp4'"]
+                              f'{os.path.join(BACKGROUND_DIR, video)}', '-t', '10', '-c', 'copy', f'workspace/temp/bg-{idx}.mp4']
 
                 ffresult = subprocess.run(output_cmd, capture_output=True)
                 assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
