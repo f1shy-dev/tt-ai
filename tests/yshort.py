@@ -6,12 +6,13 @@ from rich.prompt import Confirm
 import os
 import subprocess
 import openai
-openai.api_key = 'sk-' or os.environ.get(
-    "OPENAI_API_KEY")
-
 from rich.console import Console
 import json
 console = Console()
+openai.api_key = os.environ.get(
+    "OPENAI_API_KEY")
+console.log(f"[grey46]Loaded OpenAI API Key: {openai.api_key[:8]})
+
 
 BG_CLIP = './bg-sand.mp4'
 DEVICE = "cpu"
