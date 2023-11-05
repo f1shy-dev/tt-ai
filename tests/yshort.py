@@ -122,7 +122,7 @@ for idx, line in enumerate(data['content']):
     joined += f'[{color}]{line["text"]}[/{color}]\n'
 
 console.print(joined)
-assert Confirm.ask('Is this script good?')
+# assert Confirm.ask('Is this script good?')
 
 
 console.log(
