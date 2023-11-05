@@ -124,7 +124,7 @@ def gpt_loop(tries=0):
         else:
             console.log(
                 f'[red]Content generated is not valid json, trying again ({tries}/3)...')
-            gpt_loop(tries + 1)
+            return gpt_loop(tries + 1)
 
 
 data = gpt_loop()
