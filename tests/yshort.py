@@ -19,9 +19,9 @@ console.log(f"[grey46]Loaded OpenAI API Key: {openai.api_key[:8]}")
 
 #fmt: off
 BG_CLIP = './bg-sand.mp4'
-DEVICE = "cpu"
-BATCH_SIZE = 1  # reduce if low on GPU mem
-COMPUTE_TYPE = "int8"  # float16 if using gpu
+DEVICE = "cuda"
+BATCH_SIZE = 16  # reduce if low on GPU mem
+COMPUTE_TYPE = "float16"  # float16 if using gpu
 MODEL_NAME = 'base' # jonatasgrosman/wav2vec2-large-xlsr-53-english
 FT_MODEL = "ft:gpt-3.5-turbo-0613:personal::8HNFjrTY"
 ALIGN_MODEL = "WAV2VEC2_ASR_BASE_960H"
