@@ -23,7 +23,7 @@ COMPUTE_TYPE = "float16" # float16 if using gpu
 MODEL_NAME = 'base'
 FT_MODEL = "ft:gpt-3.5-turbo-0613:personal::8HNFjrTY"
 ALIGN_MODEL = "WAV2VEC2_ASR_BASE_960H" # jonatasgrosman/wav2vec2-large-xlsr-53-english
-MAX_WORDS_PER_SEG = 5
+MAX_WORDS_PER_SEG = 3
 BACKGROUND_DIR = './workspace/bg-vids'
 
 console.log("[grey46]Done loading imports...")
