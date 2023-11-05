@@ -52,7 +52,7 @@ with console.status("Collating background videos...") as s:
                 print(vid_duration)
                 duration += vid_duration
                 # output_cmd = f'ffmpeg -y -i {os.path.join(BACKGROUND_DIR, video)} -t {duration} -c copy workspace/temp/bg-{idx}.mp4'
-                output_cmd = ['ffmpeg','-y', '-i' f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{duration}', '-c', 'copy', f'workspace/temp/bg-{idx}.mp4']
+                output_cmd = ['ffmpeg','-y', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{duration}', '-c', 'copy', f'workspace/temp/bg-{idx}.mp4']
                 print(' '.join(output_cmd))
                 ffresult = subprocess.run(output_cmd, capture_output=True)
                 assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
