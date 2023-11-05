@@ -1,0 +1,15 @@
+{
+  "model": "ft:gpt-3.5-turbo-0613:personal::8HNFjrTY",
+  "messages": [
+    {
+      "role": "system",
+      "content": "you are generating a script for a social media short/reel about facts.\nthe topic for the facts is just \"random/interesting facts\".\nmake sure to include:\n    * hooks to social media features like \"like and follow for more facts\" or \"comment your favorite fact below\", or \"follow since you'll never see me again\".\n    * end the video with a form of hook like \"and so\" then start the video with \"here are ...\" since the video loops, so it will seem like it's a never ending list of facts to increase watch time\n    * in total, around 10 facts+hooks - minimum 2 hooks\n    * the title of the video - with emojis, ellipses, question marks, exclamation marks, hashtags, etc\n\nformat in JSON like so:\n{\n    \"title\": \"<title>\",\n    \"content\": [\n        {\"text\": \"<fact>\", \"type\": \"fact\"},\n        {\"text\": \"<fact>\", \"type\": \"fact\"},\n        {\"text\": \"<hook>\", \"type\": \"hook\"},\n        //... and so on\n    ]\n}"      
+      
+    }
+  ],
+  "temperature": 0.68,
+  "max_tokens": 512,
+  "top_p": 0.99,
+  "frequency_penalty": 0.34,
+  "presence_penalty": 0.1
+}

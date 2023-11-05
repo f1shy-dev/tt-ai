@@ -3,13 +3,13 @@ import pandas as pd
 import numpy as np
 
 
-def write_ass(transcript: Iterator[dict],
-              #   file: TextIO,
-              resolution: str = "word",
-              color: str = None, underline=True,
-              prefmt: str = None, suffmt: str = None,
-              font: str = None, font_size: int = 24,
-              strip=True, **kwargs):
+def write_adv_substation_alpha(transcript: Iterator[dict],
+                               #   file: TextIO,
+                               resolution: str = "word",
+                               color: str = None, underline=True,
+                               prefmt: str = None, suffmt: str = None,
+                               font: str = None, font_size: int = 24,
+                               strip=True, **kwargs):
     """
     Credit: https://github.com/jianfch/stable-ts/blob/ff79549bd01f764427879f07ecd626c46a9a430a/stable_whisper/text_output.py
         Generate Advanced SubStation Alpha (ass) file from results to
@@ -129,8 +129,15 @@ def write_ass(transcript: Iterator[dict],
                         idx_0 = cdx
                         idx_1 = cdx + 1
                     elif resolution == "word":
-                        idx_0 = 5  # um
-                        idx_1 = 5
+                        # print("*seg", segment)
+                        # print("*cdx", cdx)
+                        # print("*crow", crow)
+                        # print("*prev", prev)
+                        # print("\n")
+                        # idx_0 = segment['text'].index()
+                        idx_0 = segment['text'].index(crow['word'])
+                        idx_1 = segment['text'].index(
+                            crow['word']) + len(crow['word'])
                     # fill gap
                     if crow['start'] > prev:
                         filler_ts = {
