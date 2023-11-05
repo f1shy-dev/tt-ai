@@ -106,6 +106,7 @@ def main():
     ydl = yt_dlp.YoutubeDL({
         'format': 'bestaudio',
         'outtmpl': f"{OUT_DIR}/random-%(id)s.%(ext)s",
+        'merge_output_format': 'mp4',
         'quiet': True,
         'no_warnings': True,
         'noprogress': True,
