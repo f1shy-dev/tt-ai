@@ -102,6 +102,8 @@ def gpt_loop(tries = 0):
     try:
         data = json.loads(content)
         print(data, file=open('workspace/temp/data.json', 'w'))
+        if not 'content' in data or not 'title' in data or not 'length' in data['content']:
+            raise ValueError('Content generated is not valid json')
         return data
     except Exception as e:
         if tries > 3:
@@ -132,7 +134,8 @@ model_a, metadata = whisperx.load_align_model(
 os.makedirs('workspace/temp', exist_ok=True)
 
 console.log('[grey46]Converting text to speech...')
-text_to_speach(joined, f'workspace/temp/tts.mp3')
+joined_tts = '\n'.join([line['text'] for line in data['content'] if line['text'].strip() != ''])
+text_to_speach(joined_tts, f'workspace/temp/tts.mp3')
 
 console.log("[grey46]Loading audio to tensor...")
 audio = whisperx.load_audio(
