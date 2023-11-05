@@ -41,8 +41,8 @@ with console.status("Collating background videos...") as s:
                 vid_duration = float(duration_output)
                 duration += vid_duration
                 start_time = random.uniform(0, duration - 10)
-                output_cmd = f'ffmpeg -ss {start_time} -i {os.path.join(BACKGROUND_DIR, video)} -t 10 -c copy workspace/temp/bg-{idx}.mp4'
-                subprocess.run(output_cmd,capture_output=True, shell=True)
+                output_cmd = f'ffmpeg -y -ss {start_time} -i {os.path.join(BACKGROUND_DIR, video)} -t 10 -c copy workspace/temp/bg-{idx}.mp4'
+                subprocess.run(output_cmd.split(), capture_output=True)
 
             elif video.startswith('whole-'):
                 duration_cmd = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 {os.path.join(BACKGROUND_DIR, video)}'
@@ -50,8 +50,8 @@ with console.status("Collating background videos...") as s:
                 vid_duration = float(duration_output)
                 vid_duration = min(duration, 10)
                 duration += vid_duration
-                output_cmd = f'ffmpeg -i {os.path.join(BACKGROUND_DIR, video)} -t {duration} -c copy workspace/temp/bg-{idx}.mp4'
-                subprocess.run(output_cmd,capture_output=True, shell=True)
+                output_cmd = f'ffmpeg -y -i {os.path.join(BACKGROUND_DIR, video)} -t {duration} -c copy workspace/temp/bg-{idx}.mp4'
+                subprocess.run(output_cmd.split(), capture_output=True)
             packlist_file.write(f'file bg-{idx}.mp4\n')
             if duration >= 70:
                 break
