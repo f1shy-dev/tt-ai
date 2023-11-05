@@ -121,7 +121,7 @@ DEVICE = "cpu"
 BATCH_SIZE = 1  # reduce if low on GPU mem
 # change to "int8" if low on GPU mem (may reduce accuracy)
 COMPUTE_TYPE = "int8"
-MODEL_NAME = 'large-v2'
+MODEL_NAME = 'base'
 
 console.log(
     f"loading models whisperx:{MODEL_NAME}, align:wav2vec2-large-xlsr-53-english")
