@@ -1,6 +1,7 @@
 from typing import Callable, TextIO, Iterator, Tuple
 import pandas as pd
 import numpy as np
+import re
 
 
 def write_adv_substation_alpha(transcript: Iterator[dict],
@@ -126,8 +127,25 @@ def write_adv_substation_alpha(transcript: Iterator[dict],
 
             last_idx_map = {}
 
-            def find_idx(str, ch):
-                yield [i for i, c in enumerate(str) if c == ch]
+            def findall(p, s):
+                '''Yields all the positions of
+                the pattern p in the string s.'''
+                i = s.find(p)
+                while i != -1:
+                    yield i
+                    i = s.find(p, i+1)
+
+            def findall_old(p, s):
+                words = []
+                building = ''
+                for idx, char in enumerate(s):
+                    if re.match(r'\s', char):
+                        words.append((idx, building))
+                        building = ''
+                    else:
+                        building += char
+
+                return [idx for idx, word in words if word == p]
 
             for cdx, crow in res_segs.iterrows():
                 if not np.isnan(crow['start']):
@@ -135,15 +153,19 @@ def write_adv_substation_alpha(transcript: Iterator[dict],
                         idx_0 = cdx
                         idx_1 = cdx + 1
                     elif resolution == "word":
-                        idxs = list(find_idx(segment['text'], crow['word']))
+                        idxs = list(
+                            findall_old(crow['word'], segment['text']))
                         if crow['word'] in last_idx_map:
                             offset = last_idx_map[crow['word']]
                         else:
                             offset = 0
-                        print("*dl", crow['word'], offset, idxs)
+
                         idx_0 = idxs[0 + offset]
                         idx_1 = idxs[0 + offset] + len(crow['word'])
                         last_idx_map[crow['word']] = offset + 1
+
+                        # print("*tl", crow['word'], offset,
+                        #       idxs, segment['text'], idx_0, idx_1)
                     # fill gap
                     if crow['start'] > prev:
                         filler_ts = {
