@@ -36,8 +36,8 @@ with console.status("Collating background videos...") as s:
         for idx, video in enumerate(videos):
             s.update(f"Collating background videos... (processing #{idx}/{len(videos)} - at {duration}s duration)")
             if video.startswith('rand-'):
-                duration_cmd = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 {os.path.join(BACKGROUND_DIR, video)}'
-                duration_output = subprocess.run(duration_cmd.split(), capture_output=True)
+                duration_cmd = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', os.path.join(BACKGROUND_DIR, video)]
+                duration_output = subprocess.run(duration_cmd, capture_output=True)
                 vid_duration = float(duration_output.stdout)
                 print(vid_duration)
                 duration += vid_duration
@@ -46,8 +46,8 @@ with console.status("Collating background videos...") as s:
                 subprocess.run(output_cmd.split(), capture_output=True)
 
             elif video.startswith('whole-'):
-                duration_cmd = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 {os.path.join(BACKGROUND_DIR, video)}'
-                duration_output = subprocess.run(duration_cmd.split(), capture_output=True)
+                duration_cmd = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', os.path.join(BACKGROUND_DIR, video)]
+                duration_output = subprocess.run(duration_cmd, capture_output=True)
                 vid_duration = float(duration_output.stdout)
                 vid_duration = min(duration, 10)
                 print(vid_duration)
