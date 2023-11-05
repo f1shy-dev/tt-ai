@@ -104,7 +104,7 @@ def download_threaded(urls, ydl, adv, n_threads=8):
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     ydl = yt_dlp.YoutubeDL({
-        'format': 'bestaudio',
+        'format': 'bestvideo',
         'outtmpl': f"{OUT_DIR}/random-%(id)s.%(ext)s",
         'merge_output_format': 'mp4',
         'quiet': True,
