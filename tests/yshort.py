@@ -28,7 +28,7 @@ ALIGN_MODEL = "WAV2VEC2_ASR_BASE_960H"
 MAX_WORDS_PER_SEG = 3
 BACKGROUND_DIR = './workspace/bg-vids'
 OUT_DIR = './workspace/clips/yshort'
-WATERMARK_IMG = "watermarks/km-watermark.png"
+WATERMARK_IMG = "watermarks/f-plug-wm.png"
 #fmt: on
 
 console.log("[grey46]Done loading imports...")
@@ -200,8 +200,9 @@ for idx, word in enumerate(words):
 console.log("[grey46]Generating subtitle file...")
 ass_content = write_adv_substation_alpha(
     comp_segs,
+    font_size=20,
     Fontname='Dela Gothic One',
-    BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='12',
+    BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='20',
     Alignment='5',
     MarginL='10',
     MarginR='10',
@@ -240,7 +241,7 @@ with console.status("Merging background video and audio + cropping...") as s:
         WATERMARK_IMG,
         "-filter_complex",
         # center watermark, make it 512x512 (image is 1024x1024)
-        "[1]scale=304:304[wm];[0][wm]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2+800",
+        "[1]format=rgba,colorchannelmixer=aa=0.6[logo];[logo][0]scale2ref=oh*mdar:ih*0.15[logo][video];[video][logo]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2+500",
 
         "-c:a",
         "copy",
