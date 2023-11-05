@@ -121,7 +121,7 @@ DEVICE = "cpu"
 BATCH_SIZE = 1  # reduce if low on GPU mem
 # change to "int8" if low on GPU mem (may reduce accuracy)
 COMPUTE_TYPE = "int8"
-MODEL_NAME = 'large-v2'
+MODEL_NAME = 'base'
 
 console.log(
     f"loading models whisperx:{MODEL_NAME}, align:wav2vec2-large-xlsr-53-english")
@@ -226,13 +226,13 @@ for idx, word in enumerate(words):
     if idx % MAX_WORDS_PER_SEG == 0:
         comp_segs.append({
             "text": "",
-            "start": word['start'],
-            "end": word['end'],
+            "start": word['start'] if 'start' in word else None,
+            "end": word['end'] if 'end' in word else None,
             "words": []
         })
     comp_segs[-1]['words'].append(word)
     comp_segs[-1]['text'] += word['word'] + ' '
-    comp_segs[-1]['end'] = word['end']
+    comp_segs[-1]['end'] = word['end'] if 'end' in word else comp_segs[-1]['end']
 console.log("writing sub")
 # sub_style = "Alignment=6,Fontname=Dela Gothic One,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=170,Fontsize=16"
 
