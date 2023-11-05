@@ -37,7 +37,7 @@ with console.status("Collating background videos...") as s:
         for idx, video in enumerate(videos):
             s.update(f"Collating background videos... (processing #{idx}/{len(videos)} - at {duration}s duration)")
             if video.startswith('random-'):
-                vid_duration = ffmpeg.probe(os.path.join(BACKGROUND_DIR, video))['format']['duration']
+                vid_duration = float(ffmpeg.probe(os.path.join(BACKGROUND_DIR, video))['format']['duration'])
                 print(vid_duration, os.path.join(BACKGROUND_DIR, video))
                 duration += vid_duration
                 start_time = random.uniform(0, duration - 10)
@@ -45,7 +45,7 @@ with console.status("Collating background videos...") as s:
                 subprocess.run(output_cmd.split(), capture_output=True)
 
             elif video.startswith('whole-'):
-                vid_duration = ffmpeg.probe(os.path.join(BACKGROUND_DIR, video))['format']['duration']
+                vid_duration = float(ffmpeg.probe(os.path.join(BACKGROUND_DIR, video))['format']['duration'])
                 vid_duration = min(vid_duration, 10)
                 print(vid_duration)
                 duration += vid_duration
