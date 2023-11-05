@@ -70,7 +70,7 @@ with console.status("Collating background videos...") as s:
         packlist_file.close()
     s.update("Merging background videos...")
     merge_cmd = ['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', 'workspace/temp/ffmpeg-packlist-bg.txt',
-                 '-an', '-v:c', 'copy', '-t', '70', 'workspace/temp/bg-merge.mp4']
+                 '-an', '-c:v', 'copy', '-t', '70', 'workspace/temp/bg-merge.mp4']
     ffresult = subprocess.run(merge_cmd, capture_output=True)
     assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(merge_cmd)}"
     console.log("Generated background video...")
