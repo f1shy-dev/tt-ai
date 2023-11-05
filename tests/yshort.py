@@ -1,3 +1,4 @@
+import ffmpeg
 import whisperx
 from ttai_farm.v4.write_ass import write_adv_substation_alpha
 from ttai_farm.v4.tts import text_to_speach
@@ -36,19 +37,15 @@ with console.status("Collating background videos...") as s:
         for idx, video in enumerate(videos):
             s.update(f"Collating background videos... (processing #{idx}/{len(videos)} - at {duration}s duration)")
             if video.startswith('rand-'):
-                duration_cmd = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', os.path.join(BACKGROUND_DIR, video)]
-                duration_output = subprocess.run(duration_cmd, capture_output=True)
-                vid_duration = float(duration_output.stdout)
-                print(vid_duration, duration_output)
+                vid_duration = ffmpeg.probe(os.path.join(BACKGROUND_DIR, video))['format']['duration']
+                print(vid_duration)
                 duration += vid_duration
                 start_time = random.uniform(0, duration - 10)
                 output_cmd = f'ffmpeg -y -ss {start_time} -i {os.path.join(BACKGROUND_DIR, video)} -t 10 -c copy workspace/temp/bg-{idx}.mp4'
                 subprocess.run(output_cmd.split(), capture_output=True)
 
             elif video.startswith('whole-'):
-                duration_cmd = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', os.path.join(BACKGROUND_DIR, video)]
-                duration_output = subprocess.run(duration_cmd, capture_output=True)
-                vid_duration = float(duration_output.stdout)
+                vid_duration = ffmpeg.probe(os.path.join(BACKGROUND_DIR, video))['format']['duration']
                 vid_duration = min(duration, 10)
                 print(vid_duration)
                 duration += vid_duration
