@@ -11,7 +11,7 @@ import json
 console = Console()
 openai.api_key = os.environ.get(
     "OPENAI_API_KEY")
-console.log(f"[grey46]Loaded OpenAI API Key: {openai.api_key[:8]})
+console.log(f"[grey46]Loaded OpenAI API Key: {openai.api_key[:8]}")
 
 
 BG_CLIP = './bg-sand.mp4'
