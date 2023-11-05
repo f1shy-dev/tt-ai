@@ -46,7 +46,7 @@ with console.status("Collating background videos...") as s:
 
             elif video.startswith('whole-'):
                 vid_duration = ffmpeg.probe(os.path.join(BACKGROUND_DIR, video))['format']['duration']
-                vid_duration = min(duration, 10)
+                vid_duration = min(vid_duration, 10)
                 print(vid_duration)
                 duration += vid_duration
                 output_cmd = f'ffmpeg -y -i {os.path.join(BACKGROUND_DIR, video)} -t {duration} -c copy workspace/temp/bg-{idx}.mp4'
