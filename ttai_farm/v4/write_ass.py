@@ -140,8 +140,10 @@ def write_adv_substation_alpha(transcript: Iterator[dict],
                             offset = last_idx_map[crow['word']]
                         else:
                             offset = 0
+                        print("*dl", crow['word'], offset, idxs)
                         idx_0 = idxs[0 + offset]
                         idx_1 = idxs[0 + offset] + len(crow['word'])
+                        last_idx_map[crow['word']] = offset + 1
                     # fill gap
                     if crow['start'] > prev:
                         filler_ts = {
