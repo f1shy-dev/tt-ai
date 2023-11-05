@@ -102,8 +102,8 @@ def gpt_loop(tries = 0):
     try:
         data = json.loads(content)
         print(data, file=open('workspace/temp/data.json', 'w'))
-        if not 'content' in data or not 'title' in data:
-            raise ValueError('Content generated is not valid json')
+        # if not 'content' in data or not 'title' in data:
+        #     raise ValueError('Content generated is not valid json')
         return data
     except Exception as e:
         if tries > 3:
