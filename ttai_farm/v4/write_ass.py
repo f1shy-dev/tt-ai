@@ -123,21 +123,25 @@ def write_adv_substation_alpha(transcript: Iterator[dict],
                 speaker_str = f"[{segment['speaker']}]: "
             else:
                 speaker_str = ""
+
+            last_idx_map = {}
+
+            def find_idx(str, ch):
+                yield [i for i, c in enumerate(str) if c == ch]
+
             for cdx, crow in res_segs.iterrows():
                 if not np.isnan(crow['start']):
                     if resolution == "char":
                         idx_0 = cdx
                         idx_1 = cdx + 1
                     elif resolution == "word":
-                        # print("*seg", segment)
-                        # print("*cdx", cdx)
-                        # print("*crow", crow)
-                        # print("*prev", prev)
-                        # print("\n")
-                        # idx_0 = segment['text'].index()
-                        idx_0 = segment['text'].index(crow['word'])
-                        idx_1 = segment['text'].index(
-                            crow['word']) + len(crow['word'])
+                        idxs = find_idx(segment['text'], crow['word'])
+                        if crow['word'] in last_idx_map:
+                            offset = last_idx_map[crow['word']]
+                        else:
+                            offset = 0
+                        idx_0 = idxs[0 + offset]
+                        idx_1 = idxs[0 + offset] + len(crow['word'])
                     # fill gap
                     if crow['start'] > prev:
                         filler_ts = {

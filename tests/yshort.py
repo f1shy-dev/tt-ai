@@ -17,16 +17,20 @@ openai.api_key = os.environ.get(
 console.log(f"[grey46]Loaded OpenAI API Key: {openai.api_key[:8]}")
 
 
+#fmt: off
 BG_CLIP = './bg-sand.mp4'
-DEVICE = "cuda"
-BATCH_SIZE = 16  # reduce if low on GPU mem
-COMPUTE_TYPE = "float16" # float16 if using gpu
-MODEL_NAME = 'base'
+DEVICE = "cpu"
+BATCH_SIZE = 1  # reduce if low on GPU mem
+COMPUTE_TYPE = "int8"  # float16 if using gpu
+MODEL_NAME = 'base' # jonatasgrosman/wav2vec2-large-xlsr-53-english
 FT_MODEL = "ft:gpt-3.5-turbo-0613:personal::8HNFjrTY"
-ALIGN_MODEL = "WAV2VEC2_ASR_BASE_960H" # jonatasgrosman/wav2vec2-large-xlsr-53-english
+ALIGN_MODEL = "WAV2VEC2_ASR_BASE_960H"
 MAX_WORDS_PER_SEG = 3
 BACKGROUND_DIR = './workspace/bg-vids'
 OUT_DIR = './workspace/clips/yshort'
+WATERMARK_IMG = "watermarks/km-watermark.png"
+#fmt: on
+
 console.log("[grey46]Done loading imports...")
 
 # open file for writing packlist
@@ -36,22 +40,27 @@ with console.status("Collating background videos...") as s:
         random.shuffle(videos)
         duration = 0
         for idx, video in enumerate(videos):
-            s.update(f"Collating background videos... (processing #{idx}/{len(videos)} - at {duration}s duration)")
+            s.update(
+                f"Collating background videos... (processing #{idx}/{len(videos)} - at {duration}s duration)")
             if video.startswith('random-'):
-                vid_duration = float(ffmpeg.probe(os.path.join(BACKGROUND_DIR, video))['format']['duration'])
+                vid_duration = float(ffmpeg.probe(os.path.join(
+                    BACKGROUND_DIR, video))['format']['duration'])
                 print(vid_duration, os.path.join(BACKGROUND_DIR, video))
                 duration += vid_duration
                 start_time = random.uniform(0, duration - 10)
-                output_cmd = ['ffmpeg', '-y', '-ss', f'{start_time}', '-i', f"'{os.path.join(BACKGROUND_DIR, video)}'", '-t', '10', '-c', 'copy', f"'workspace/temp/bg-{idx}.mp4'"]
-                
+                output_cmd = ['ffmpeg', '-y', '-ss', f'{start_time}', '-i',
+                              f"'{os.path.join(BACKGROUND_DIR, video)}'", '-t', '10', '-c', 'copy', f"'workspace/temp/bg-{idx}.mp4'"]
+
                 ffresult = subprocess.run(output_cmd, capture_output=True)
                 assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
 
             elif video.startswith('whole-'):
-                vid_duration = float(ffmpeg.probe(os.path.join(BACKGROUND_DIR, video))['format']['duration'])
+                vid_duration = float(ffmpeg.probe(os.path.join(
+                    BACKGROUND_DIR, video))['format']['duration'])
                 vid_duration = min(vid_duration, 10)
                 duration += vid_duration
-                output_cmd = ['ffmpeg','-y', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{duration}', '-c', 'copy', f'workspace/temp/bg-{idx}.mp4']
+                output_cmd = [
+                    'ffmpeg', '-y', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{duration}', '-c', 'copy', f'workspace/temp/bg-{idx}.mp4']
                 ffresult = subprocess.run(output_cmd, capture_output=True)
                 assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
             packlist_file.write(f"file bg-{idx}.mp4\n")
@@ -59,9 +68,11 @@ with console.status("Collating background videos...") as s:
                 break
         packlist_file.close()
     s.update("Merging background videos...")
-    merge_cmd = ['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', 'workspace/temp/ffmpeg-packlist-bg.txt', '-an', '-vf', 'crop=ih*(9/16):ih', '-t', '70', 'workspace/temp/bg-merge.mp4']
+    merge_cmd = ['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', 'workspace/temp/ffmpeg-packlist-bg.txt',
+                 '-an', '-vf', 'crop=ih*(9/16):ih', '-t', '70', 'workspace/temp/bg-merge.mp4']
     ffresult = subprocess.run(merge_cmd, capture_output=True)
     assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(merge_cmd)}"
+    console.log("Generated background video...")
 
 
 prompt = """you are generating a script for a social media short/reel about facts.
@@ -84,7 +95,8 @@ format in JSON like so:
 }"""
 console.log(f"[grey46]Generating script w/ model {FT_MODEL}...")
 
-def gpt_loop(tries = 0):
+
+def gpt_loop(tries=0):
     response = openai.ChatCompletion.create(
         model=FT_MODEL,
         messages=[{"role": "system", "content": prompt}],
@@ -110,8 +122,10 @@ def gpt_loop(tries = 0):
         if tries > 3:
             raise ValueError('Content generated is not valid json')
         else:
-            console.log(f'[red]Content generated is not valid json, trying again ({tries}/3)...')
+            console.log(
+                f'[red]Content generated is not valid json, trying again ({tries}/3)...')
             gpt_loop(tries + 1)
+
 
 data = gpt_loop()
 joined = ''
@@ -135,7 +149,8 @@ model_a, metadata = whisperx.load_align_model(
 os.makedirs('workspace/temp', exist_ok=True)
 
 console.log('[grey46]Converting text to speech...')
-joined_tts = '\n'.join([line['text'] for line in data['content'] if line['text'].strip() != ''])
+joined_tts = '\n'.join([line['text']
+                       for line in data['content'] if line['text'].strip() != ''])
 text_to_speach(joined_tts, f'workspace/temp/tts.mp3')
 
 console.log("[grey46]Loading audio to tensor...")
@@ -154,7 +169,8 @@ formatted_segs = result['segments']
 words = []
 comp_segs = []
 
-print(json.dumps(formatted_segs), file=open('workspace/temp/formatted_segs.json', 'w'))
+print(json.dumps(formatted_segs), file=open(
+    'workspace/temp/formatted_segs.json', 'w'))
 for segm in formatted_segs:
     words += [
         {
@@ -183,7 +199,7 @@ for idx, word in enumerate(words):
 
 console.log("[grey46]Generating subtitle file...")
 ass_content = write_adv_substation_alpha(
-    comp_segs, 
+    comp_segs,
     Fontname='Dela Gothic One',
     BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='12',
     Alignment='5',
@@ -197,9 +213,9 @@ with open('./workspace/temp/subs.ass', 'w') as f:
 with console.status("Merging background video and audio + cropping...") as s:
     os.makedirs(OUT_DIR, exist_ok=True)
     ffresult = subprocess.run(['ffmpeg', '-i', './workspace/temp/bg-merge.mp4', '-i', './workspace/temp/tts.mp3', '-y', '-vf', 'crop=ih*(9/16):ih',
-                            '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0', '-shortest', './workspace/temp/bg_with_tts_audio.mp4'], capture_output=True)
+                               '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0', '-shortest', './workspace/temp/bg_with_tts_audio.mp4'], capture_output=True)
     assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
-
+    console.log("Merged bg video and audio...")
     s.update("Burning subs onto video...")
 
     now = datetime.datetime.now()
@@ -208,6 +224,28 @@ with console.status("Merging background video and audio + cropping...") as s:
     final_output = f"{OUT_DIR}/short_{current_time}.mp4"
 
     ffresult = subprocess.run(['ffmpeg', '-i', './workspace/temp/bg_with_tts_audio.mp4',
-                            '-vf', "ass=./workspace/temp/subs.ass:fontsdir='fonts'",
-                            '-y', '-c:a', 'copy', final_output], capture_output=True)
+                               '-vf', "ass=./workspace/temp/subs.ass:fontsdir='fonts'",
+                               '-y', '-c:a', 'copy', './workspace/temp/subbed.mp4'], capture_output=True)
+
     assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
+    console.log("Subtitled video...")
+
+    s.update("Watermarking video...")
+    ffresult = subprocess.run([
+        "ffmpeg",
+        "-y",
+        './workspace/temp/subbed.mp4',
+        "-i",
+        "-i",
+        WATERMARK_IMG,
+        "-filter_complex",
+        # center watermark, make it 512x512 (image is 1024x1024)
+        "[1]scale=304:304[wm];[0][wm]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2+800",
+
+        "-c:a",
+        "copy",
+        # "crf", "18",
+        final_output
+    ], capture_output=True)
+    assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
+    console.log("Watermarked video...Done!")
