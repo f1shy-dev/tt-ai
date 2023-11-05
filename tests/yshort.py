@@ -128,8 +128,9 @@ console.log(
 model = whisperx.load_model(
     MODEL_NAME, DEVICE, compute_type=COMPUTE_TYPE, language='en', threads=16)
 model_a, metadata = whisperx.load_align_model(
-    language_code='en', device=DEVICE, model_name='jonatasgrosman/wav2vec2-large-xlsr-53-english')
+    language_code='en', device=DEVICE)
 
+# , model_name='jonatasgrosman/wav2vec2-large-xlsr-53-english'
 aligned_segs = []
 os.makedirs('workspace/temp', exist_ok=True)
 # for idx, line in enumerate(data['content']):
@@ -221,13 +222,22 @@ MAX_WORDS_PER_SEG = 5
 words = []
 comp_segs = []
 for segm in formatted_segs:
-    words += segm['words']
+    words += [
+        {
+            "word": w['word'],
+            "start": float(w['start']) if 'start' in w else None,
+            "end": float(w['end']) if 'end' in w else None,
+            "seg_start": float(segm['start']) if 'start' in segm else None,
+            "seg_end": float(segm['end']) if 'end' in segm else None,
+            "score": float(w['score']) if 'score' in w else None,
+        } for w in segm['words']
+    ]
 for idx, word in enumerate(words):
     if idx % MAX_WORDS_PER_SEG == 0:
         comp_segs.append({
             "text": "",
-            "start": word['start'] if 'start' in word else None,
-            "end": word['end'] if 'end' in word else None,
+            "start": word['start'] if 'start' in word else word['seg_start'],
+            "end": word['end'] if 'end' in word else word['seg_end'],
             "words": []
         })
     comp_segs[-1]['words'].append(word)
