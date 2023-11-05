@@ -221,34 +221,45 @@ formatted_segs = result['segments']
 MAX_WORDS_PER_SEG = 5
 words = []
 comp_segs = []
-# for segm in formatted_segs:
-#     words += [
-#         {
-#             "word": w['word'],
-#             "start": float(w['start']) if 'start' in w else None,
-#             "end": float(w['end']) if 'end' in w else None,
-#             "seg_start": float(segm['start']) if 'start' in segm else None,
-#             "seg_end": float(segm['end']) if 'end' in segm else None,
-#             "score": float(w['score']) if 'score' in w else None,
-#         } for w in segm['words']
-#     ]
-# # for idx, word in enumerate(words):
-# #     if idx % MAX_WORDS_PER_SEG == 0:
-# #         comp_segs.append({
-# #             "text": "",
-# #             "start": word['start'] else word['seg_start'] else None,
-# #             "end": word['end'] else word['seg_end'] else None,
-# #             "words": [],
-# #         })
-# #     comp_segs[-1]['text'] += word['word'] + ' '
-# #     comp_segs[-1]['words'].append(word)
-# #     comp_segs[-1]['end'] = word['end'] if word['end'] is not None else comp_segs[-1]['end']
 
-# print(json.dumps(comp_segs), file=open('workspace/temp/comp_segs.json', 'w'))
+print(json.dumps(formatted_segs), file=open('workspace/temp/formatted_segs.json', 'w'))
+for segm in formatted_segs:
+    words += [
+        {
+            "word": w['word'],
+            "start": float(w['start']) if 'start' in w else None,
+            "end": float(w['end']) if 'end' in w else None,
+            "score": float(w['score']) if 'score' in w else None,
+        } for w in segm['words']
+    ]
+has_split = False
+for idx, word in enumerate(words):
+    if idx % MAX_WORDS_PER_SEG == 0:
+        has_split = False
+    if not has_split:
+        if 'start' in word and word['start'] is not None:
+            comp_segs.append({
+                "text": "",
+                "start": word['start'],
+                "end": word['end'],
+                "words": []
+            })
+            has_split = True
+    comp_segs[-1]['text'] += word['word'] + " "
+    comp_segs[-1]['words'].append(word)
+    comp_segs[-1]['end'] = word['end'] if word['end'] is not None else comp_segs[-1]['end']
+# print(json.dumps(comp_segs), file=open('workspace/temp/words.json', 'w'))
+print(json.dumps(comp_segs), file=open('workspace/temp/comp_segs.json', 'w'))
 # sub_style = "Alignment=6,Fontname=Dela Gothic One,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=170,Fontsize=16"
 
-ass_content = write_adv_substation_alpha(formatted_segs, Fontname='Dela Gothic One',
-                                         BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='16')
+ass_content = write_adv_substation_alpha(
+    comp_segs, 
+    Fontname='Dela Gothic One',
+    BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='12',
+    Alignment='5',
+    MarginL='10',
+    MarginR='10',
+    MarginV='10')
 
 # console.log("mergging audio")
 # ffresult = subprocess.run(['ffmpeg', '-f', 'concat', '-safe', '0', '-i',
@@ -282,6 +293,6 @@ ffresult = subprocess.run(['ffmpeg', '-i', './workspace/temp/sand_no_audio.mp4',
 assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"
 console.log("merge subs ")
 ffresult = subprocess.run(['ffmpeg', '-i', './workspace/temp/sand_with_tts_audio.mp4',
-                           '-vf', "ass=./workspace/temp/subs.ass:fontsdir='/Users/vrishank/Documents/tt-farm-v2/fonts'",
+                           '-vf', "ass=./workspace/temp/subs.ass:fontsdir='fonts'",
                            '-y', '-c:a', 'copy', './workspace/temp/combine.mp4'])
 assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}"

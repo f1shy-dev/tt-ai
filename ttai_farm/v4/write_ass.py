@@ -8,7 +8,7 @@ def write_adv_substation_alpha(transcript: Iterator[dict],
                                resolution: str = "word",
                                color: str = None, underline=True,
                                prefmt: str = None, suffmt: str = None,
-                               font: str = None, font_size: int = 24,
+                               font: str = None, font_size: int = 12,
                                strip=True, **kwargs):
     """
     Credit: https://github.com/jianfch/stable-ts/blob/ff79549bd01f764427879f07ecd626c46a9a430a/stable_whisper/text_output.py
@@ -52,11 +52,11 @@ def write_adv_substation_alpha(transcript: Iterator[dict],
 
     """
 
-    fmt_style_dict = {'Name': 'Default', 'Fontname': 'Dela Gothing One', 'Fontsize': '16', 'PrimaryColour': '&Hffffff',
+    fmt_style_dict = {'Name': 'Default', 'Fontname': 'Dela Gothic One', 'Fontsize': '12', 'PrimaryColour': '&Hffffff',
                       'SecondaryColour': '&Hffffff', 'OutlineColour': '&H0', 'BackColour': '&H0', 'Bold': '0',
                       'Italic': '0', 'Underline': '0', 'StrikeOut': '0', 'ScaleX': '100', 'ScaleY': '100',
                       'Spacing': '0', 'Angle': '0', 'BorderStyle': '1', 'Outline': '1', 'Shadow': '0',
-                      'Alignment': '2', 'MarginL': '10', 'MarginR': '10', 'MarginV': '10', 'Encoding': '0'}
+                      'Alignment': '5', 'MarginL': '10', 'MarginR': '10', 'MarginV': '10', 'Encoding': '0'}
 
     for k, v in filter(lambda x: 'colour' in x[0].lower() and not str(x[1]).startswith('&H'), kwargs.items()):
         kwargs[k] = f'&H{kwargs[k]}'
