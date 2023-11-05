@@ -221,32 +221,33 @@ formatted_segs = result['segments']
 MAX_WORDS_PER_SEG = 5
 words = []
 comp_segs = []
-for segm in formatted_segs:
-    words += [
-        {
-            "word": w['word'],
-            "start": float(w['start']) if 'start' in w else None,
-            "end": float(w['end']) if 'end' in w else None,
-            "seg_start": float(segm['start']) if 'start' in segm else None,
-            "seg_end": float(segm['end']) if 'end' in segm else None,
-            "score": float(w['score']) if 'score' in w else None,
-        } for w in segm['words']
-    ]
-for idx, word in enumerate(words):
-    if idx % MAX_WORDS_PER_SEG == 0:
-        comp_segs.append({
-            "text": "",
-            "start": word['start'] if 'start' in word else word['seg_start'],
-            "end": word['end'] if 'end' in word else word['seg_end'],
-            "words": []
-        })
-    comp_segs[-1]['words'].append(word)
-    comp_segs[-1]['text'] += word['word'] + ' '
-    comp_segs[-1]['end'] = word['end'] if 'end' in word else comp_segs[-1]['end']
-console.log("writing sub")
+# for segm in formatted_segs:
+#     words += [
+#         {
+#             "word": w['word'],
+#             "start": float(w['start']) if 'start' in w else None,
+#             "end": float(w['end']) if 'end' in w else None,
+#             "seg_start": float(segm['start']) if 'start' in segm else None,
+#             "seg_end": float(segm['end']) if 'end' in segm else None,
+#             "score": float(w['score']) if 'score' in w else None,
+#         } for w in segm['words']
+#     ]
+# # for idx, word in enumerate(words):
+# #     if idx % MAX_WORDS_PER_SEG == 0:
+# #         comp_segs.append({
+# #             "text": "",
+# #             "start": word['start'] else word['seg_start'] else None,
+# #             "end": word['end'] else word['seg_end'] else None,
+# #             "words": [],
+# #         })
+# #     comp_segs[-1]['text'] += word['word'] + ' '
+# #     comp_segs[-1]['words'].append(word)
+# #     comp_segs[-1]['end'] = word['end'] if word['end'] is not None else comp_segs[-1]['end']
+
+# print(json.dumps(comp_segs), file=open('workspace/temp/comp_segs.json', 'w'))
 # sub_style = "Alignment=6,Fontname=Dela Gothic One,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=170,Fontsize=16"
 
-ass_content = write_adv_substation_alpha(comp_segs, Fontname='Dela Gothic One',
+ass_content = write_adv_substation_alpha(formatted_segs, Fontname='Dela Gothic One',
                                          BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', MarginV='170', Fontsize='16')
 
 # console.log("mergging audio")
