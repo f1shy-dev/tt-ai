@@ -47,7 +47,7 @@ with console.status("Collating background videos...") as s:
                     BACKGROUND_DIR, video))['format']['duration'])
                 print(vid_duration, os.path.join(BACKGROUND_DIR, video))
                 duration += vid_duration
-                start_time = random.uniform(0, duration - 10)
+                start_time = random.uniform(0, vid_duration - 10)
                 output_cmd = ['ffmpeg', '-y', '-ss', f'{start_time}', '-i',
                               f'{os.path.join(BACKGROUND_DIR, video)}', '-t', '10', '-c', 'copy', f'workspace/temp/bg-{idx}.mp4']
 
