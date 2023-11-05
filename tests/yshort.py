@@ -36,7 +36,7 @@ with console.status("Collating background videos...") as s:
         duration = 0
         for idx, video in enumerate(videos):
             s.update(f"Collating background videos... (processing #{idx}/{len(videos)} - at {duration}s duration)")
-            if video.startswith('rand-'):
+            if video.startswith('random-'):
                 vid_duration = ffmpeg.probe(os.path.join(BACKGROUND_DIR, video))['format']['duration']
                 print(vid_duration, os.path.join(BACKGROUND_DIR, video))
                 duration += vid_duration
