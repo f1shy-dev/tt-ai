@@ -53,10 +53,10 @@ def write_adv_substation_alpha(transcript: Iterator[dict],
 
     """
 
-    fmt_style_dict = {'Name': 'Default', 'Fontname': 'Dela Gothic One', 'Fontsize': '12', 'PrimaryColour': '&Hffffff',
-                      'SecondaryColour': '&Hffffff', 'OutlineColour': '&H0', 'BackColour': '&H0', 'Bold': '0',
+    fmt_style_dict = {'Name': 'Default', 'Fontname': 'Dela Gothic One', 'Fontsize': '12', 'PrimaryColour': '&H00FFFF',
+                      'SecondaryColour': '&H00FFFF', 'OutlineColour': '&HFFFFFF', 'BackColour': '&H0', 'Bold': '0',
                       'Italic': '0', 'Underline': '0', 'StrikeOut': '0', 'ScaleX': '100', 'ScaleY': '100',
-                      'Spacing': '0', 'Angle': '0', 'BorderStyle': '1', 'Outline': '1', 'Shadow': '0',
+                      'Spacing': '0', 'Angle': '0', 'BorderStyle': '1', 'Outline': '2', 'Shadow': '0',
                       'Alignment': '5', 'MarginL': '10', 'MarginR': '10', 'MarginV': '10', 'Encoding': '0'}
 
     for k, v in filter(lambda x: 'colour' in x[0].lower() and not str(x[1]).startswith('&H'), kwargs.items()):
@@ -86,7 +86,8 @@ def write_adv_substation_alpha(transcript: Iterator[dict],
     else:
         if not color:
             # color = 'HFF00'
-            color = 'D64573'
+            # color = 'D64573'
+            color = 'FFFFFF'
         underline_code = r'\u1' if underline else ''
 
         prefmt = r'{\1c&' + f'{color.upper()}&{underline_code}' + '}'
