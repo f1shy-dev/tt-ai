@@ -64,7 +64,7 @@ with console.status("Collating background videos...") as s:
             #         'ffmpeg', '-y', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{duration}', '-c', 'copy', f'workspace/temp/bg-{idx}.mp4']
             #     ffresult = subprocess.run(output_cmd, capture_output=True)
             #     assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
-            packlist_file.write(f"file bg-{idx}.mp4\n")
+                packlist_file.write(f"file bg-{idx}.mp4\n")
             if duration >= 70:
                 break
         packlist_file.close()
