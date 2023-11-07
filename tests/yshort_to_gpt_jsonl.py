@@ -602,15 +602,15 @@ def main():
 
         task = progress.add_task("Downloading videos", total=len(videos))
 
-        for url, title, views in videos:
-            if not os.path.exists(f"{AUDIO_DIR}/{url.split('/')[-1]}.wav"):
-                ydl.download([url])
-                ffmpeg_cmd = f"ffmpeg -i {TEMP_DIR}/{url.split('/')[-1]}.webm -ac 1 -ar 16000 {AUDIO_DIR}/{url.split('/')[-1]}.wav"
-                output = subprocess.run(
-                    ffmpeg_cmd.split(" "), capture_output=True)
-                assert output.returncode == 0, f"ffmpeg failed: {output.stderr}"
-                os.remove(f"{TEMP_DIR}/{url.split('/')[-1]}.webm")
-            progress.advance(task)
+        # for url, title, views in videos:
+        #     if not os.path.exists(f"{AUDIO_DIR}/{url.split('/')[-1]}.wav"):
+        #         ydl.download([url])
+        #         ffmpeg_cmd = f"ffmpeg -i {TEMP_DIR}/{url.split('/')[-1]}.webm -ac 1 -ar 16000 {AUDIO_DIR}/{url.split('/')[-1]}.wav"
+        #         output = subprocess.run(
+        #             ffmpeg_cmd.split(" "), capture_output=True)
+        #         assert output.returncode == 0, f"ffmpeg failed: {output.stderr}"
+        #         os.remove(f"{TEMP_DIR}/{url.split('/')[-1]}.webm")
+        #     progress.advance(task)
 
         def adv():
             progress.advance(task)
@@ -635,6 +635,7 @@ def main():
                     'ass': ass_content,
                     'url': url,
                     'title': title,
+                    'views': views
                 }
 
                 with open(f'{DATA_DIR}/{url.split("/")[-1]}.json', 'w') as f:
