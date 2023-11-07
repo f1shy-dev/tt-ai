@@ -7,8 +7,8 @@ import os
 from rich.console import Console
 import json
 console = Console()
-DATA_DIR = "./yshorts/data"
-OUT_FILE = "./yshorts/combine.jsonl"
+DATA_DIR = "./workspace/yshorts/data"
+OUT_FILE = "./workspace/yshorts/combine.jsonl"
 out_file = open(OUT_FILE, 'w')
 encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
 
@@ -21,6 +21,11 @@ def replace_unicode_escapes(match):
 files = os.listdir(DATA_DIR)
 total_tokens = 0
 total_wrote = 0
+skipped_too_long = 0
+skipped_too_short = 0
+skipped_other = 0
+topics = {}
+
 with Progress(
     SpinnerColumn(),
     TextColumn("[bold blue]{task.fields[filename]}", justify="right"),
@@ -40,7 +45,9 @@ with Progress(
     )
     random.shuffle(files)
     for i, filename in enumerate(files):
-        if total_wrote > 100 - 1:
+        # if total_wrote > 100 - 1:
+        #     break
+        if total_tokens >= 140_000:
             break
         progress.update(task, filename=filename, status="processing")
         with open(os.path.join(DATA_DIR, filename)) as f:
@@ -79,16 +86,21 @@ with Progress(
             facts_prompt = """you are generating a script for a social media short/reel about facts.
 the topic for the facts is just "{0}".
 make sure to include:
-    * hooks to social media features like "like and follow for more facts" or "comment your favorite fact below", or "follow since you'll never see me again".
-    * end the video with a form of hook like "and so" then start the video with "here are ..." since the video loops, so it will seem like it's a never ending list of facts to increase watch time
+    * hooks to social media features like "like and follow for more facts" or "comment your favorite fact below"
+    * end the video with either:
+        * a hook like "and so" then start the video with "here are ..." since the video loops, so it will seem like it's a never ending list of facts to increase watch time
+        * something like "follow since you'll never see me again" and a cliffhangery fact/statement
     * in total, around 10 facts+hooks - minimum 2 hooks
     * the title of the video - with emojis, ellipses, question marks, exclamation marks, hashtags, etc
+    * facts that would be seen as 'outrageous'/'disturbing' - grabbing the audience's attention - something bizzare or really random if needed, depending on the topic
 
 format in JSON like so:
 {
     "title": "<title>",
     "content": [
         {"text": "<fact>", "type": "fact"},
+        {"text": "<fact>", "type": "fact"},
+        {"text": "<hook>", "type": "hook"},
         {"text": "<fact>", "type": "fact"},
         {"text": "<hook>", "type": "hook"},
         //... and so on
@@ -100,23 +112,44 @@ format in JSON like so:
 
             # def enc(ij): return re.sub(
             #     r'\\u([0-9a-fA-F]{4})', replace_unicode_escapes, ij).encode('utf-8', 'replace').decode()
-            def enc(ij):
+            def enc(text, checkHash=False):
                 # if '\\u' in ij:
                 # print(ij)
                 # return ij.encode('utf-8', 'replace').decode()
-                return ij
+                if checkHash and '#' in text:
+                    return ''
+                return text
 
-            content = [{"text": enc(s), "type": "hook" if any(
+            content = [{"text": enc(s, True), "type": "hook" if any(
                 [hw in s for hw in hook_words]) else "fact"} for s in sentences]
+            prelen = len(content)
             content = [c for c in content if c['text'] != '']
+            postlen = len(content)
+            if prelen != postlen:
+                console.log(
+                    f'[red]skipping {filename} (removed {prelen - postlen} empty sentences)')
+                skipped_other += 1
+                continue
             if len(content) < 10:
                 console.log(f'[red]skipping {filename} (<10 facts)')
+                skipped_too_short += 1
                 continue
 
             if len(content) > 18:
                 console.log(f'[red]skipping {filename} (>18 facts)')
+                skipped_too_long += 1
                 continue
 
+            ttitle_cpy = ttitle
+            if 'shower thoughts' in ttitle_cpy:
+                ttitle_cpy = 'shower thoughts'
+
+            if 'girls' in ttitle_cpy:
+                ttitle_cpy = 'girls'
+
+            if 'boy' in ttitle_cpy:
+                ttitle_cpy = 'boy(s)'
+            topics[ttitle_cpy] = topics.get(ttitle_cpy, 0) + 1
             sys_content_str = facts_prompt.replace('{0}', ttitle)
             ass_content_str = json.dumps({
                 "title": enc(data['title']),
@@ -154,3 +187,21 @@ format in JSON like so:
 out_file.close()
 console.log(
     f'[medium_purple3]wrote {total_wrote} - token size: {total_tokens}')
+# ski
+console.log(
+    f'[red]skipped {skipped_too_long} videos for >18 facts')
+
+console.log(
+    f'[red]skipped {skipped_too_short} videos for <10 facts')
+
+console.log(
+    f'[red]skipped {skipped_other} videos "other"')
+
+console.print()
+
+console.log(
+    f'[medium_purple3 bold]topic distribution')
+
+for topic, count in topics.items():
+    console.log(
+        f'[medium_purple3]  * {topic} - {count}')
