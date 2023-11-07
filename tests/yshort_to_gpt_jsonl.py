@@ -531,10 +531,10 @@ MODEL_NAME = 'base'
 TOP_NUMBER = 200
 
 
-# console.log(f"loading whisperx {MODEL_NAME} model...")
-# model = whisperx.load_model(MODEL_NAME, DEVICE, compute_type=COMPUTE_TYPE)
-# model_a, metadata = whisperx.load_align_model(
-#     language_code='en', device=DEVICE)
+console.log(f"loading whisperx {MODEL_NAME} model...")
+model = whisperx.load_model(MODEL_NAME, DEVICE, compute_type=COMPUTE_TYPE)
+model_a, metadata = whisperx.load_align_model(
+    language_code='en', device=DEVICE)
 
 
 def download_audio_one(url, ydl):
@@ -641,11 +641,11 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
     og_len = len(videos)
     videos.sort(key=lambda x: convert_views_to_int(x[2]), reverse=True)
     videos = videos[:TOP_NUMBER]
-    for url, title, views in videos:
-        console.print(
-            f'[medium_purple3]{url.split("/").pop()} - {views} - {title}')
-    console.log('og len', og_len)
+    # for url, title, views in videos:
+    #     console.print(
+    #         f'[medium_purple3]{url.split("/").pop()} - {views} - {title}')
+    # console.log('og len', og_len)
+    main()
