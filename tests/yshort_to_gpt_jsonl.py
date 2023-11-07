@@ -1,10 +1,12 @@
 from threading import Thread
+from ttai_farm.v4.write_ass import write_adv_substation_alpha
 from queue import Queue
 import whisperx
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCompleteColumn
 import os
 import yt_dlp
 import subprocess
+import json
 from rich.console import Console
 console = Console()
 
@@ -600,7 +602,7 @@ def main():
 
         task = progress.add_task("Downloading videos", total=len(videos))
 
-        for url, title in videos:
+        for url, title, views in videos:
             if not os.path.exists(f"{AUDIO_DIR}/{url.split('/')[-1]}.wav"):
                 ydl.download([url])
                 ffmpeg_cmd = f"ffmpeg -i {TEMP_DIR}/{url.split('/')[-1]}.webm -ac 1 -ar 16000 {AUDIO_DIR}/{url.split('/')[-1]}.wav"
@@ -615,7 +617,7 @@ def main():
         download_threaded(videos, ydl, adv)
 
         task = progress.add_task("Transcribing videos", total=len(videos))
-        for url, title in videos:
+        for url, title, views in videos:
             if not os.path.exists(f"{DATA_DIR}/{url.split('/')[-1]}.json"):
                 audio = whisperx.load_audio(
                     f"{AUDIO_DIR}/{url.split('/')[-1]}.wav")
@@ -625,7 +627,7 @@ def main():
                 result = whisperx.align(
                     result["segments"], model_a, metadata, audio, DEVICE, return_char_alignments=False)
                 segs = result['segments']
-                ass_content = write_ass(segs)
+                ass_content = write_adv_substation_alpha(segs)
                 joined = '\n'.join([seg['text'] for seg in result['segments']])
                 print(f"\n\n\n# {title} #\n{joined}")
                 data = {
