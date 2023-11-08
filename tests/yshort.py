@@ -9,6 +9,7 @@ from openai import OpenAI
 from rich.console import Console
 import json
 import random
+import torch
 console = Console()
 client = OpenAI()
 # console.log(f"[grey46]Loaded OpenAI API Key: {openai.api_key[:8]}")
@@ -31,6 +32,12 @@ WATERMARK_IMG = "watermarks/f-plug-wm.png"
 #fmt: on
 
 [os.makedirs(x, exist_ok=True) for x in [TEMP_DIR, SAVE_ANALYSIS_DIR, OUT_DIR]]
+
+
+if not torch.cuda.is_available():
+    BATCH_SIZE = 1
+    COMPUTE_TYPE = 'int8'
+    DEVICE = 'cpu'
 
 console.log("[grey46]Done initalising...")
 
