@@ -121,14 +121,13 @@ def gpt_loop(tries=0):
         max_tokens=512,
         frequency_penalty=0.07,
         presence_penalty=0.07,
-        response_format={"type":"json"}
+        response_format={"type":"json_object"}
     )
-    usage_tk = response["usage"]
-    prompt_tk = int(usage_tk['prompt_tokens'])
-    comp_tk = int(usage_tk['completion_tokens'])
+    prompt_tk = int(response.usage.prompt_tokens)
+    comp_tk = int(response.usage.completion_tokens)
     console.log(
-        f"Used {prompt_tk} prompt + {comp_tk} completion ({usage_tk['total_tokens']} total ~ ${(prompt_tk/1000*0.012) + (comp_tk/1000*0.016)}) tokens.")
-    content = response["choices"][0]["message"]["content"]
+        f"Used {prompt_tk} prompt + {comp_tk} completion ({response.usage.total_tokens} total ~ ${(prompt_tk/1000*0.003) + (comp_tk/1000*0.006)}) tokens.")
+    content = response.choices[0].message.content
 
     try:
         data = json.loads(content)
