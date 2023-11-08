@@ -13,7 +13,7 @@ import json
 import random
 console = Console()
 client = OpenAI()
-console.log(f"[grey46]Loaded OpenAI API Key: {openai.api_key[:8]}")
+#console.log(f"[grey46]Loaded OpenAI API Key: {openai.api_key[:8]}")
 
 
 #fmt: off
