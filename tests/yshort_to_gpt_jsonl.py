@@ -530,7 +530,7 @@ BATCH_SIZE = 16  # reduce if low on GPU mem
 # change to "int8" if low on GPU mem (may reduce accuracy)
 COMPUTE_TYPE = "float16"
 MODEL_NAME = 'base'
-TOP_NUMBER = 250
+TOP_NUMBER = 175
 
 
 console.log(f"loading whisperx {MODEL_NAME} model...")
