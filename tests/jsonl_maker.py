@@ -68,7 +68,7 @@ with Progress(
                 console.log(f'[red]skipping {filename} (finger down)')
                 continue
             elif any([p in ttitle for p in probably_random_incl]):
-                ttitle = 'random/interesting facts'
+                ttitle = 'random/interesting facts/curiosities'
             else:
                 splitters = ['that could', 'that can', 'that will', 'that would', 'that should',
                              'that might', 'that must', 'that shall', 'that ought', 'that may', 'about', 'this video can', 'this video will', 'potentially']
