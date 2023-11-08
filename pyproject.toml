@@ -19,7 +19,7 @@ dependencies = [
     "poe-api-wrapper",
     # "git+https://github.com/kokarare1212/librespot-python",
     "librespot@git+https://github.com/kokarare1212/librespot-python",
-    "git+https://github.com/m-bain/whisperx.git"
+    "whisperx@git+https://github.com/m-bain/whisperx"
 ]
 
 
