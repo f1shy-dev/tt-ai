@@ -7,13 +7,12 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCo
 from rich.prompt import Confirm
 import os
 import subprocess
-import openai
+from openai import OpenAI
 from rich.console import Console
 import json
 import random
 console = Console()
-openai.api_key = os.environ.get(
-    "OPENAI_API_KEY")
+client = OpenAI()
 console.log(f"[grey46]Loaded OpenAI API Key: {openai.api_key[:8]}")
 
 
@@ -77,18 +76,23 @@ with console.status("Collating background videos...") as s:
 
 
 prompt = """you are generating a script for a social media short/reel about facts.
-the topic for the facts is just "random/interesting facts".
+the topic for the facts is just "{0}".
 make sure to include:
-    * hooks to social media features like "like and follow for more facts" or "comment your favorite fact below", or "follow since you'll never see me again".
-    * end the video with a form of hook like "and so" then start the video with "here are ..." since the video loops, so it will seem like it's a never ending list of facts to increase watch time
+    * hooks to social media features like "like and follow for more facts" or "comment your favorite fact below"
+    * end the video with either:
+        * a hook like "and so" then start the video with "here are ..." since the video loops, so it will seem like it's a never ending list of facts to increase watch time
+        * something like "follow since you'll never see me again" and a cliffhangery fact/statement
     * in total, around 10 facts+hooks - minimum 2 hooks
     * the title of the video - with emojis, ellipses, question marks, exclamation marks, hashtags, etc
+    * facts that would be seen as 'outrageous'/'disturbing' - grabbing the audience's attention - something bizzare or really random if needed, depending on the topic
 
 format in JSON like so:
 {
     "title": "<title>",
     "content": [
         {"text": "<fact>", "type": "fact"},
+        {"text": "<fact>", "type": "fact"},
+        {"text": "<hook>", "type": "hook"},
         {"text": "<fact>", "type": "fact"},
         {"text": "<hook>", "type": "hook"},
         //... and so on
@@ -98,13 +102,14 @@ console.log(f"[grey46]Generating script w/ model {FT_MODEL}...")
 
 
 def gpt_loop(tries=0):
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model=FT_MODEL,
         messages=[{"role": "system", "content": prompt}],
-        temperature=0.68,
+        temperature=0.7,
         max_tokens=512,
-        frequency_penalty=0.32,
-        presence_penalty=0.12,
+        frequency_penalty=0.07,
+        presence_penalty=0.07,
+        response_format={"type":"json"}
     )
     usage_tk = response["usage"]
     prompt_tk = int(usage_tk['prompt_tokens'])
