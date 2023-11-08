@@ -7,7 +7,7 @@ from mutagen.mp3 import MP3
 
 
 def text_to_speach(text, filepath):
-    body = {"voice": "Brian", "text": text, "service": "StreamElements"}
+    body = {"voice": "en-US-Standard-D", "text": text, "service": "StreamElements"}
     response = requests.post(
         "https://lazypy.ro/tts/request_tts.php", data=body)
     # print(response.json())

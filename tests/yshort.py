@@ -56,10 +56,11 @@ with console.status("Collating background videos...") as s:
             vid_duration = float(ffmpeg.probe(os.path.join(
                 BACKGROUND_DIR, video))['format']['duration'])
             print(vid_duration, os.path.join(BACKGROUND_DIR, video))
+            back_dur = 20 if vid_duration > 100 else 7
 
-            start_time = random.uniform(0, vid_duration - 20)
-            duration += 20
-            output_cmd = ['ffmpeg', '-y', '-ss', f'{start_time}', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', '20',
+            start_time = random.uniform(0, vid_duration - back_dur)
+            duration += back_dur
+            output_cmd = ['ffmpeg', '-y', '-ss', f'{start_time}', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{back_dur}',
                           '-vf', 'crop=ih*(9/16):ih', '-c:v', 'libx264', '-crf', '18', '-b:v', '8000k', '-r', '30', '-preset', 'medium',
                           f'workspace/temp/bg-{idx}.mp4']
 
@@ -92,8 +93,30 @@ with console.status("Collating background videos...") as s:
     console.log("Generated background video...")
 
 
+common_topics = [
+    ["random facts", ["random/interesting facts/curiosities"]],
+    ['love/relationships', ['signs she likes you',
+                            'signs he likes you', 'signs they hate you']],
+    ['girls/boys', ['things girls dont want you to know', 'things boys dont want you to know',
+                    'things girls should know about boys', 'the girls want you to know that']],
+    ['save your life', ['save your life']],
+]
+
+console.print("")
+for idx, tpk in enumerate(common_topics):
+    console.print(f"[light_steel_blue](#{idx}) {tpk[0]}")
+console.print(f"[light_steel_blue](#999) custom topic")
+
+topic_idx = int(console.input("[medium_purple3]Enter topic: "))
+topic = ''
+if topic_idx == 999:
+    topic = console.input("[medium_purple3]Enter topic title: ")
+else:
+    topic = random.choice(common_topics[topic_idx][1])
+console.log(f"[grey46]Generating script w/ model {FT_MODEL}...")
+
 prompt = """you are generating a script for a social media short/reel about facts.
-the topic for the facts is just "{0}".
+the topic for the facts is just "{_{0}_}".
 make sure to include:
     * hooks to social media features like "like and follow for more facts" or "comment your favorite fact below"
     * end the video with either:
@@ -115,33 +138,12 @@ format in JSON like so:
         //... and so on
     ]
 }"""
-
-common_topics = [
-    ["random facts", ["random/interesting facts/curiosities"]],
-    ['love/relationships', ['signs she likes you',
-                            'signs he likes you', 'signs they hate you']],
-    ['girls/boys', ['things girls dont want you to know', 'things boys dont want you to know',
-                    'things girls should know about boys', 'the girls want you to know that']],
-    ['save your life', ['save your life']],
-]
-
-console.print("")
-for idx, topic in enumerate(common_topics):
-    console.print(f"[light_steel_blue](#{idx}) {topic[0]}")
-console.print(f"[light_steel_blue](#999) custom topic")
-
-topic_idx = int(console.input("[medium_purple3]Enter topic: "))
-if topic_idx == 999:
-    topic = console.input("[medium_purple3]Enter topic title: ")
-else:
-    topic = random.choice(common_topics[topic_idx][1])
-console.log(f"[grey46]Generating script w/ model {FT_MODEL}...")
-
+prompt = prompt.replace('{_{0}_}', topic)
 
 def gpt_loop(tries=0):
     response = client.chat.completions.create(
         model=FT_MODEL,
-        messages=[{"role": "system", "content": prompt.format(topic)}],
+        messages=[{"role": "system", "content": prompt}],
         temperature=0.7,
         max_tokens=512,
         frequency_penalty=0.07,
@@ -248,9 +250,9 @@ ass_content = write_adv_substation_alpha(
     Fontname='Dela Gothic One',
     BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='18',
     Alignment='5',
-    MarginL='10',
-    MarginR='10',
-    MarginV='100')
+    # MarginL='10',
+    # MarginR='10',
+    MarginV='170')
 
 with open('./workspace/temp/subs.ass', 'w') as f:
     f.write(ass_content)
@@ -285,7 +287,7 @@ with console.status("Merging background video and audio + cropping...") as s:
         WATERMARK_IMG,
         "-filter_complex",
         # center watermark, make it 512x512 (image is 1024x1024)
-        "[1]format=rgba,colorchannelmixer=aa=0.6[logo];[logo][0]scale2ref=oh*mdar:ih*0.15[logo][video];[video][logo]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2+500",
+        "[1]format=rgba,colorchannelmixer=aa=0.6[logo];[logo][0]scale2ref=oh*mdar:ih*0.1[logo][video];[video][logo]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2+525",
 
         "-c:a",
         "copy",
