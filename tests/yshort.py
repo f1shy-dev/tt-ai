@@ -3,8 +3,6 @@ import ffmpeg
 import whisperx
 from ttai_farm.v4.write_ass import write_adv_substation_alpha
 from ttai_farm.v4.tts import text_to_speach
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCompleteColumn
-from rich.prompt import Confirm
 import os
 import subprocess
 from openai import OpenAI
@@ -13,7 +11,7 @@ import json
 import random
 console = Console()
 client = OpenAI()
-#console.log(f"[grey46]Loaded OpenAI API Key: {openai.api_key[:8]}")
+# console.log(f"[grey46]Loaded OpenAI API Key: {openai.api_key[:8]}")
 
 
 #fmt: off
@@ -27,21 +25,21 @@ ALIGN_MODEL = "WAV2VEC2_ASR_BASE_960H"
 MAX_WORDS_PER_SEG = 2
 BACKGROUND_DIR = './workspace/bg-vids'
 OUT_DIR = './workspace/clips/yshort'
+TEMP_DIR = './workspace/temp'
+SAVE_ANALYSIS_DIR = './workspace/temp/saves'
 WATERMARK_IMG = "watermarks/f-plug-wm.png"
 #fmt: on
 
-console.log("[grey46]Done loading imports...")
+[os.makedirs(x, exist_ok=True) for x in [TEMP_DIR, SAVE_ANALYSIS_DIR, OUT_DIR]]
 
-# open file for writing packlist
+console.log("[grey46]Done initalising...")
+
 with console.status("Collating background videos...") as s:
-    # with open('workspace/temp/ffmpeg-packlist-bg.txt', 'w') as packlist_file:
     packlist = []
     videos = os.listdir(BACKGROUND_DIR)
     random.shuffle(videos)
     rand_count = len([v for v in videos if v.startswith('random-')])
     whole_count = len([v for v in videos if v.startswith('whole-')])
-    rand_added_count = 0
-    whole_added_count = 0
     duration = 0
 
     for idx, video in enumerate(videos):
@@ -55,8 +53,8 @@ with console.status("Collating background videos...") as s:
             start_time = random.uniform(0, vid_duration - 20)
             duration += 20
             output_cmd = ['ffmpeg', '-y', '-ss', f'{start_time}', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', '20',
-                            '-vf', 'crop=ih*(9/16):ih', '-c:v', 'libx264', '-crf', '18', '-b:v', '8000k', '-r', '30', '-preset', 'medium',
-                            f'workspace/temp/bg-{idx}.mp4']
+                          '-vf', 'crop=ih*(9/16):ih', '-c:v', 'libx264', '-crf', '18', '-b:v', '8000k', '-r', '30', '-preset', 'medium',
+                          f'workspace/temp/bg-{idx}.mp4']
 
             ffresult = subprocess.run(output_cmd, capture_output=True)
             assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
@@ -110,18 +108,38 @@ format in JSON like so:
         //... and so on
     ]
 }"""
+
+common_topics = [
+    ["random facts", ["random/interesting facts/curiosities"]],
+    ['love/relationships', ['signs she likes you',
+                            'signs he likes you', 'signs they hate you']],
+    ['girls/boys', ['things girls dont want you to know', 'things boys dont want you to know',
+                    'things girls should know about boys', 'the girls want you to know that']],
+    ['save your life', ['save your life']],
+]
+
+console.print("")
+for idx, topic in enumerate(common_topics):
+    console.print(f"[light_steel_blue](#{idx}) {topic[0]}")
+console.print(f"[light_steel_blue](#999) custom topic")
+
+topic_idx = int(console.input("[medium_purple3]Enter topic: "))
+if topic_idx == 999:
+    topic = console.input("[medium_purple3]Enter topic title: ")
+else:
+    topic = random.choice(common_topics[topic_idx][1])
 console.log(f"[grey46]Generating script w/ model {FT_MODEL}...")
 
 
 def gpt_loop(tries=0):
     response = client.chat.completions.create(
         model=FT_MODEL,
-        messages=[{"role": "system", "content": prompt}],
+        messages=[{"role": "system", "content": prompt.format(topic)}],
         temperature=0.7,
         max_tokens=512,
         frequency_penalty=0.07,
         presence_penalty=0.07,
-        response_format={"type":"json_object"}
+        response_format={"type": "json_object"}
     )
     prompt_tk = int(response.usage.prompt_tokens)
     comp_tk = int(response.usage.completion_tokens)
@@ -225,7 +243,7 @@ ass_content = write_adv_substation_alpha(
     Alignment='5',
     MarginL='10',
     MarginR='10',
-    MarginV='10')
+    MarginV='100')
 
 with open('./workspace/temp/subs.ass', 'w') as f:
     f.write(ass_content)
