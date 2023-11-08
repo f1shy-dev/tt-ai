@@ -7,7 +7,7 @@ name = "ttai_farm"
 version = "2.0.12"
 description = "Automatically clip and subtitle videos using AI."
 dependencies = [
-    "openai-whisper",
+    # "openai-whisper",
     "yt-dlp",
     "ffmpeg",
     "openai",
@@ -19,6 +19,7 @@ dependencies = [
     "poe-api-wrapper",
     # "git+https://github.com/kokarare1212/librespot-python",
     "librespot@git+https://github.com/kokarare1212/librespot-python",
+    "git+https://github.com/m-bain/whisperx.git"
 ]
 
 
