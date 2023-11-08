@@ -34,41 +34,52 @@ console.log("[grey46]Done loading imports...")
 
 # open file for writing packlist
 with console.status("Collating background videos...") as s:
-    with open('workspace/temp/ffmpeg-packlist-bg.txt', 'w') as packlist_file:
-        videos = os.listdir(BACKGROUND_DIR)
-        random.shuffle(videos)
-        duration = 0
-        for idx, video in enumerate(videos):
-            s.update(
-                f"Collating background videos... (processing #{idx}/{len(videos)} - at {duration}s duration)")
-            if video.startswith('random-'):
-                vid_duration = float(ffmpeg.probe(os.path.join(
-                    BACKGROUND_DIR, video))['format']['duration'])
-                print(vid_duration, os.path.join(BACKGROUND_DIR, video))
+    # with open('workspace/temp/ffmpeg-packlist-bg.txt', 'w') as packlist_file:
+    packlist = []
+    videos = os.listdir(BACKGROUND_DIR)
+    random.shuffle(videos)
+    rand_count = len([v for v in videos if v.startswith('random-')])
+    whole_count = len([v for v in videos if v.startswith('whole-')])
+    rand_added_count = 0
+    whole_added_count = 0
 
-                start_time = random.uniform(0, vid_duration - 15)
-                duration += 15
-                output_cmd = ['ffmpeg', '-y', '-ss', f'{start_time}', '-i',
-                              f'{os.path.join(BACKGROUND_DIR, video)}', '-t', '15', '-vf', 'crop=ih*(9/16):ih', f'workspace/temp/bg-{idx}.mp4']
+    for idx, video in enumerate(videos):
+        s.update(
+            f"Collating background videos... (processing #{idx}/{len(videos)} - at {duration}s duration)")
+        if video.startswith('random-'):
+            vid_duration = float(ffmpeg.probe(os.path.join(
+                BACKGROUND_DIR, video))['format']['duration'])
+            print(vid_duration, os.path.join(BACKGROUND_DIR, video))
 
-                ffresult = subprocess.run(output_cmd, capture_output=True)
-                assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
+            start_time = random.uniform(0, vid_duration - 20)
+            duration += 20
+            output_cmd = ['ffmpeg', '-y', '-ss', f'{start_time}', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', '20',
+                            '-vf', 'crop=ih*(9/16):ih', '-c:v', 'libx264', '-crf', '18', '-b:v', '8000k', '-r', '30', '-preset', 'medium',
+                            f'workspace/temp/bg-{idx}.mp4']
 
-            elif video.startswith('whole-'):
-                vid_duration = float(ffmpeg.probe(os.path.join(
-                    BACKGROUND_DIR, video))['format']['duration'])
-                vid_duration = min(vid_duration, 10)
-                duration += vid_duration
-                output_cmd = [
-                    'ffmpeg', '-y', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{duration}', '-vf', 'crop=ih*(9/16):ih', f'workspace/temp/bg-{idx}.mp4']
-                ffresult = subprocess.run(output_cmd, capture_output=True)
-                assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
-            packlist_file.write(f"file bg-{idx}.mp4\n")
-            if duration >= 70:
-                break
-        packlist_file.close()
+            ffresult = subprocess.run(output_cmd, capture_output=True)
+            assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
+
+        elif video.startswith('whole-'):
+            vid_duration = float(ffmpeg.probe(os.path.join(
+                BACKGROUND_DIR, video))['format']['duration'])
+            vid_duration = min(vid_duration, 10)
+            duration += vid_duration
+            output_cmd = [
+                'ffmpeg', '-y', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{duration}',
+                '-vf', 'crop=ih*(9/16):ih', '-c:v', 'libx264', '-crf', '18', '-b:v', '8000k', '-r', '30', '-preset', 'medium',
+                f'workspace/temp/bg-{idx}.mp4']
+            ffresult = subprocess.run(output_cmd, capture_output=True)
+            assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(output_cmd)}"
+        packlist.append(f"file bg-{idx}.mp4")
+        if duration >= 70:
+            break
+
     s.update("Merging background videos...")
-    merge_cmd = ['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', 'workspace/temp/ffmpeg-packlist-bg.txt',
+    with open('workspace/temp/ffmpeg-packlist-bg.txt', 'w') as packlist_file:
+        packlist_file.write('\n'.join(packlist))
+
+    merge_cmd = ['ffmpeg', '-y', '-f', 'concat', '-i', 'workspace/temp/ffmpeg-packlist-bg.txt',
                  '-an', '-c:v', 'copy', '-t', '70', 'workspace/temp/bg-merge.mp4']
     ffresult = subprocess.run(merge_cmd, capture_output=True)
     assert ffresult.returncode == 0, f"ffmpeg failed: {ffresult.stderr}\n\n$> {' '.join(merge_cmd)}"
