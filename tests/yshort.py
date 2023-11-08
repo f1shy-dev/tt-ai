@@ -42,6 +42,7 @@ with console.status("Collating background videos...") as s:
     whole_count = len([v for v in videos if v.startswith('whole-')])
     rand_added_count = 0
     whole_added_count = 0
+    duration = 0
 
     for idx, video in enumerate(videos):
         s.update(
