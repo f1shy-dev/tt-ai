@@ -547,9 +547,9 @@ def download_audio_one(url, ydl):
             ffmpeg_cmd.split(" "), capture_output=True)
         assert output.returncode == 0, f"ffmpeg failed: {output.stderr}"
         os.remove(f"{TEMP_DIR}/{url.split('/')[-1]}.webm")
-        console.log(f"[medium_purple3]downloaded {url}")
+        console.log(f"[medium_purple3]downloaded {url}\n")
     else:
-        console.log(f"[green]exists: {url}")
+        console.log(f"[green]exists: {url}\n")
 
 
 def download_threaded(urls, ydl, adv, n_threads=8):
@@ -626,13 +626,14 @@ def main():
                 # print(result["segments"])  # before alignment
                 result = whisperx.align(
                     result["segments"], model_a, metadata, audio, DEVICE, return_char_alignments=False)
-                segs = result['segments']
-                ass_content = write_adv_substation_alpha(segs)
+                # segs = result['segments']
+                # ass_content = write_adv_substation_alpha(segs)
                 joined = '\n'.join([seg['text'] for seg in result['segments']])
-                print(f"\n\n\n# {title} #\n{joined}")
+                console.print(
+                    f"\n\n\n[medium_purple3 bold] {title} [/medium_purple3 bold]\n{joined}")
                 data = {
                     'transcribe': result,
-                    'ass': ass_content,
+                    # 'ass': ass_content,
                     'url': url,
                     'title': title,
                     'views': views
