@@ -49,82 +49,87 @@ common_topics = [
     ['save your life', ['save your life']],
 ]
 
-console.print("")
-for idx, tpk in enumerate(common_topics):
-    console.print(f"[light_steel_blue](#{idx}) {tpk[0]}")
-console.print(f"[light_steel_blue](#666) load last analysis from file")
-console.print(f"[light_steel_blue](#999) custom topic")
 
-topic_idx = int(console.input("[medium_purple3]Enter topic: "))
-topic = ''
-if topic_idx == 999:
-    topic = console.input("[medium_purple3]Enter topic title: ")
-elif topic_idx != 666:
-    topic = random.choice(common_topics[topic_idx][1])
-console.log(f"[grey46]Generating script w/ model {FT_MODEL}...")
+def script_loop():
+    console.print("")
+    for idx, tpk in enumerate(common_topics):
+        console.print(f"[light_steel_blue](#{idx}) {tpk[0]}")
+    console.print(f"[light_steel_blue](#666) load last analysis from file")
+    console.print(f"[light_steel_blue](#999) custom topic")
 
+    topic_idx = int(console.input("[medium_purple3]Enter topic: "))
+    topic = ''
+    if topic_idx == 999:
+        topic = console.input("[medium_purple3]Enter topic title: ")
+    elif topic_idx != 666:
+        topic = random.choice(common_topics[topic_idx][1])
+    console.log(f"[grey46]Generating script w/ model {FT_MODEL}...")
 
-def gpt_loop(tries=0):
-    response = client.chat.completions.create(
-        model=FT_MODEL,
-        messages=[{"role": "system", "content": prompt}],
-        temperature=0.7,
-        max_tokens=512,
-        frequency_penalty=0.07,
-        presence_penalty=0.07,
-        response_format={"type": "json_object"}
-    )
-    prompt_tk = int(response.usage.prompt_tokens)
-    comp_tk = int(response.usage.completion_tokens)
-    console.log(
-        f"Used {prompt_tk} prompt + {comp_tk} completion ({response.usage.total_tokens} total ~ ${(prompt_tk/1000*0.003) + (comp_tk/1000*0.006)}) tokens.")
-    content = response.choices[0].message.content
+    def gpt_loop(tries=0):
+        response = client.chat.completions.create(
+            model=FT_MODEL,
+            messages=[{"role": "system", "content": prompt}],
+            temperature=0.7,
+            max_tokens=512,
+            frequency_penalty=0.07,
+            presence_penalty=0.07,
+            response_format={"type": "json_object"}
+        )
+        prompt_tk = int(response.usage.prompt_tokens)
+        comp_tk = int(response.usage.completion_tokens)
+        console.log(
+            f"Used {prompt_tk} prompt + {comp_tk} completion ({response.usage.total_tokens} total ~ ${(prompt_tk/1000*0.003) + (comp_tk/1000*0.006)}) tokens.")
+        content = response.choices[0].message.content
 
-    try:
-        data = json.loads(content)
-        print(content, file=open(
-            f'{SAVE_ANALYSIS_DIR}/analysis-{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.json', 'w'))
-        return data
-    except Exception as e:
-        if tries > 3:
-            raise ValueError('Content generated is not valid json')
-        else:
-            console.log(
-                f'[red]Content generated is not valid json, trying again ({tries}/3)...')
-            return gpt_loop(tries + 1)
+        try:
+            data = json.loads(content)
+            print(content, file=open(
+                f'{SAVE_ANALYSIS_DIR}/analysis-{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.json', 'w'))
+            return data
+        except Exception as e:
+            if tries > 3:
+                raise ValueError('Content generated is not valid json')
+            else:
+                console.log(
+                    f'[red]Content generated is not valid json, trying again ({tries}/3)...')
+                return gpt_loop(tries + 1)
 
-
-if PROMPT.startswith("@"):
-    file_path = os.path.join(os.path.dirname(
-        __file__), f"../ttai_farm/analysis/prompts/{PROMPT[1:]}")
-    prompt = open(file_path, "r").read()
-elif PROMPT.startswith("#"):
-    file_path = PROMPT[1:]
-    prompt = open(file_path, "r").read()
-else:
-    prompt = PROMPT
-
-prompt = prompt.replace('{_{0}_}', topic)
-
-if topic_idx == 666:
-    if os.system("command -v fzf >/dev/null 2>&1") == 0:
-        file_path = os.popen(
-            f"find {SAVE_ANALYSIS_DIR} -type f | fzf").read().strip()
+    if PROMPT.startswith("@"):
+        file_path = os.path.join(os.path.dirname(
+            __file__), f"../ttai_farm/analysis/prompts/{PROMPT[1:]}")
+        prompt = open(file_path, "r").read()
+    elif PROMPT.startswith("#"):
+        file_path = PROMPT[1:]
+        prompt = open(file_path, "r").read()
     else:
-        file_path = input("Enter file name: ")
-    data = json.load(open(file_path, 'r'))
-else:
-    data = gpt_loop()
-joined = ''
-for idx, line in enumerate(data['content']):
-    if line['text'].strip() == '':
-        continue
-    color = 'red' if line['type'] == 'hook' else 'medium_purple3'
-    joined += f'[{color}]{line["text"]}[/{color}]\n'
+        prompt = PROMPT
 
-console.print(joined)
-assert Confirm.ask('Is this script good?')
+    prompt = prompt.replace('{_{0}_}', topic)
 
+    if topic_idx == 666:
+        if os.system("command -v fzf >/dev/null 2>&1") == 0:
+            file_path = os.popen(
+                f"find {SAVE_ANALYSIS_DIR} -type f | fzf").read().strip()
+        else:
+            file_path = input("Enter file name: ")
+        data = json.load(open(file_path, 'r'))
+    else:
+        data = gpt_loop()
+    joined = ''
+    for idx, line in enumerate(data['content']):
+        if line['text'].strip() == '':
+            continue
+        color = 'red' if line['type'] == 'hook' else 'medium_purple3'
+        joined += f'[{color}]{line["text"]}[/{color}]\n'
+
+    console.print(joined)
+    if not Confirm.ask('Is this script good?'):
+        return script_loop()
+
+    return data
+
+
+data = script_loop()
 
 with console.status("Collating background videos...") as s:
     packlist = []
