@@ -145,10 +145,11 @@ with console.status("Collating background videos...") as s:
         if video.startswith('random-'):
             vid_duration = float(ffmpeg.probe(os.path.join(
                 BACKGROUND_DIR, video))['format']['duration'])
-            print(vid_duration, os.path.join(BACKGROUND_DIR, video))
+            # print(vid_duration, os.path.join(BACKGROUND_DIR, video))
             back_dur = 20 if vid_duration > 100 else 7
 
-            start_time = random.uniform(0, vid_duration - back_dur)
+            start_time = 3 if vid_duration < 100 else random.uniform(
+                0, vid_duration - back_dur)
             duration += back_dur
             output_cmd = ['ffmpeg', '-y', '-ss', f'{start_time}', '-i', f'{os.path.join(BACKGROUND_DIR, video)}', '-t', f'{back_dur}',
                           '-vf', 'crop=ih*(9/16):ih', '-c:v', 'libx264', '-crf', '18', '-b:v', '8000k', '-r', '30', '-preset', 'medium',
