@@ -7,6 +7,7 @@ import os
 import subprocess
 from openai import OpenAI
 from rich.console import Console
+from rich.prompt import Confirm
 import json
 import random
 import torch
@@ -18,10 +19,11 @@ client = OpenAI()
 #fmt: off
 BG_CLIP = './bg-sand.mp4'
 DEVICE = "cuda"
-BATCH_SIZE = 16  # reduce if low on GPU mem
+BATCH_SIZE = 1  # reduce if low on GPU mem
 COMPUTE_TYPE = "float16"  # float16 if using gpu
-MODEL_NAME = 'base' # jonatasgrosman/wav2vec2-large-xlsr-53-english
+MODEL_NAME = 'medium' # jonatasgrosman/wav2vec2-large-xlsr-53-english
 FT_MODEL = "ft:gpt-3.5-turbo-1106:personal:farm-chan:8IVnpqJi"
+#FT_MODEL = "gpt-3.5-turbo-1106"
 ALIGN_MODEL = "WAV2VEC2_ASR_BASE_960H"
 MAX_WORDS_PER_SEG = 2
 BACKGROUND_DIR = './workspace/bg-vids'
@@ -105,13 +107,14 @@ common_topics = [
 console.print("")
 for idx, tpk in enumerate(common_topics):
     console.print(f"[light_steel_blue](#{idx}) {tpk[0]}")
+console.print(f"[light_steel_blue](#666) load last analysis from file")
 console.print(f"[light_steel_blue](#999) custom topic")
 
 topic_idx = int(console.input("[medium_purple3]Enter topic: "))
 topic = ''
 if topic_idx == 999:
     topic = console.input("[medium_purple3]Enter topic title: ")
-else:
+elif topic_idx != 666:
     topic = random.choice(common_topics[topic_idx][1])
 console.log(f"[grey46]Generating script w/ model {FT_MODEL}...")
 
@@ -158,7 +161,7 @@ def gpt_loop(tries=0):
 
     try:
         data = json.loads(content)
-        print(data, file=open('workspace/temp/data.json', 'w'))
+        print(content, file=open(f'{SAVE_ANALYSIS_DIR}/analysis-{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.json', 'w'))
         # if not 'content' in data or not 'title' in data:
         #     raise ValueError('Content generated is not valid json')
         return data
@@ -171,7 +174,16 @@ def gpt_loop(tries=0):
             return gpt_loop(tries + 1)
 
 
-data = gpt_loop()
+# data = gpt_loop()
+# data = json.load(open('workspace/temp/data.json', 'r'))
+if topic_idx == 666:
+    # data = json.load(open('workspace/temp/data.json', 'r'))
+    if os.system("command -v fzf >/dev/null 2>&1") == 0:
+        file_path = os.popen(f"find {SAVE_ANALYSIS_DIR} -type f | fzf").read().strip()
+    else:
+        file_path = input("Enter file name: ")
+else:
+    data = gpt_loop()
 joined = ''
 for idx, line in enumerate(data['content']):
     if line['text'].strip() == '':
@@ -180,7 +192,7 @@ for idx, line in enumerate(data['content']):
     joined += f'[{color}]{line["text"]}[/{color}]\n'
 
 console.print(joined)
-# assert Confirm.ask('Is this script good?')
+assert Confirm.ask('Is this script good?')
 
 
 console.log(

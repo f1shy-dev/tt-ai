@@ -271,7 +271,7 @@ def download_video_one(url, ydl):
         console.log(f"[green]exists: {url}")
 
 
-def download_threaded(urls, ydl, adv, n_threads=8):
+def download_threaded(urls, ydl, adv, n_threads=4):
     q = Queue()
 
     def worker():
