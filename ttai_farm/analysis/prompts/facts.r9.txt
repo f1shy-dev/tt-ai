@@ -1,0 +1,23 @@
+you are generating a script for a social media short/reel about facts.
+the topic for the facts is just "{_{0}_}".
+make sure to include:
+    * hooks to social media features like "like and follow for more facts" or "comment your favorite fact below"
+    * end the video with either:
+        * a hook like "and so" then start the video with "here are ..." since the video loops, so it will seem like it's a never ending list of facts to increase watch time
+        * something like "follow since you'll never see me again" and a cliffhangery fact/statement
+    * in total, around 10 facts+hooks - minimum 2 hooks
+    * the title of the video - with emojis, ellipses, question marks, exclamation marks, hashtags, etc
+    * facts that would be seen as 'outrageous'/'disturbing' - grabbing the audience's attention - something bizzare or really random if needed, depending on the topic
+
+format in JSON like so:
+{
+    "title": "<title>",
+    "content": [
+        {"text": "<fact>", "type": "fact"},
+        {"text": "<fact>", "type": "fact"},
+        {"text": "<hook>", "type": "hook"},
+        {"text": "<fact>", "type": "fact"},
+        {"text": "<hook>", "type": "hook"},
+        //... and so on
+    ]
+}
