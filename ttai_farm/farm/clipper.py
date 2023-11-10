@@ -193,7 +193,7 @@ def clip_video(workspace_dir: str, skip_clip_if_cached: bool, video_info: VideoI
                 sub_srt_file.write("\n\n".join(list(map(lambda x: "\n".join(
                     [str(int(x[0]) - num_offset + 1), f"{fmt_ts(x[1])} --> {fmt_ts(x[2])}", x[3]]), sub_srt_data))))
 
-            sub_style = "Alignment=6,Fontname=Dela Gothic One,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=170,Fontsize=16"
+            sub_style = "Alignment=6,Fontname=Archivo Black,BackColour=&H80000000,Spacing=0.2,Outline=0,Shadow=0.75,PrimaryColour=&H00FFFFFF,Bold=1,MarginV=170,Fontsize=16"
             # command = f"ffmpeg -y -i \"{og_clip_path}\" -vf 'subtitles=\"{srt_path}\":force_style=\"{sub_style}\"' \"{sub_clip_path}\""
             # console.log(
             #     f"[grey46]Using subtitles from {sub_srt_path}")

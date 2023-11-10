@@ -38,7 +38,7 @@ for idx, word in enumerate(words):
 console.log("[grey46]Generating subtitle file...")
 ass_content = write_adv_substation_alpha(
     comp_segs,
-    Fontname='Dela Gothic One',
+    Fontname='Archivo Black',
     BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='12',
     Alignment='5',
     MarginL='10',
