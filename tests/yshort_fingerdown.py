@@ -138,32 +138,3 @@ def makeBG():
     # Use ffmpeg to combine the videos in bg_vids
     subprocess.run(["ffmpeg", "-f", "concat", "-safe", "0", "-i", "/media/OS/Users/Mohid/tt-ai/workspace/filelist.txt", "-c", "copy", "workspace/temp/background.mp4"])
     # os.remove("workspace/temp/filelist.txt")
-
-def makeTTS():
-    directory = "workspace/temp/tempscripts"
-    files = os.listdir(directory)
-    for file in files:
-        with open(f"{directory}/{file}") as f:
-            data = json.load(f)
-        print(data)
-        # generate the tts
-        tts = text_to_speach(data["title"])
-        tts += text_to_speach(data["sentence1"])
-        tts += text_to_speach(data["sentence2"])
-        tts += text_to_speach(data["sentence3"])
-        tts += text_to_speach(data["sentence4"])
-        tts += text_to_speach(data["sentence5"])
-        tts += text_to_speach(data["sentence6"])
-        tts += text_to_speach(data["sentence7"])
-        tts += text_to_speach(data["sentence8"])
-        tts += text_to_speach(data["sentence9"])
-        tts += text_to_speach(data["sentence10"])
-        tts += text_to_speach(data["sentence11"])
-        tts += text_to_speach(data["sentence12"])
-        # save the tts to a file
-        with open(f"workspace/temp/tts/{file[:-5]}.mp3", "wb") as f:
-            f.write(tts)
-        # save the tts to a file
-        with open(f"workspace/temp/tts/{file[:-5]}.txt", "w") as f:
-            f.write(tts)
-makeTTS()
