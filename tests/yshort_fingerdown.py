@@ -120,7 +120,7 @@ def genScript():
 
 def makeBG():
     # Parameters
-    directory = "workspace/v5/bg-mirror"
+    directory = "workspace/v5/bg"
     files = os.listdir(directory)
     bg_vids = []
     combined_length = 0
@@ -130,7 +130,7 @@ def makeBG():
         print(file)
         bg_vids.append(file)
         print(bg_vids)
-        file_length = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", f"workspace/v5/bg-mirror/{file}"],
+        file_length = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", f"{directory}/{file}"],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
         print(file_length.stdout)
@@ -139,8 +139,8 @@ def makeBG():
     # create a filelist.txt with the bg_vids
     with open("workspace/v5/temp/filelist.txt", "w") as f:
         for file in bg_vids:
-            print(f"file '../bg-mirror/{file}'\n")
-            f.write(f"file '../bg-mirror/{file}'\n")
+            print(f"file '../bg/{file}'\n")
+            f.write(f"file '../bg/{file}'\n")
     # Use ffmpeg to combine the videos in bg_vids
     subprocess.run(["ffmpeg", "-f", "concat", "-safe", "0", "-i", "workspace/v5/temp/filelist.txt", "-c", "copy", "workspace/v5/output/background.mp4"])
     # os.remove("workspace/temp/filelist.txt")
