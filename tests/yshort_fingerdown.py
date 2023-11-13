@@ -1,8 +1,7 @@
 import datetime
 import ffmpeg
 import whisperx
-from ttai_farm.v4.write_ass import write_adv_substation_alpha
-from ttai_farm.v4.tts import text_to_speach
+# from ttai_farm.v4.write_ass import write_adv_substation_alpha
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCompleteColumn
 from rich.prompt import Confirm
 import os
@@ -11,12 +10,18 @@ from rich.console import Console
 import json
 import random
 from poe_api_wrapper import PoeApi
+import requests
+from requests.exceptions import JSONDecodeError
+from rich.progress import track
+from mutagen.mp3 import MP3
 
 def genScript():
+    # Parameters
     client = PoeApi('ze72NYTMJwGeu4_hdNqP2A==')
     console = Console()
     bot = "a2"
     prompt = '''
+
     {
     "video1": {
     "title": "Put a finger down - <theme> edition!",
@@ -98,7 +103,7 @@ def genScript():
     # separate the json 
     data = json.loads(response)
     print(data)
-    directory = 'workspace/temp/tempscripts/'
+    directory = 'workspace/v5/temp/tempscripts/'
     if not os.path.exists(directory):
         os.makedirs(directory)
         print(f"Directory '{directory}' created.")
@@ -108,33 +113,62 @@ def genScript():
         print(f"Processing {video}")
         video_data = data[video]
         print(video_data["title"])
-        filename = f"workspace/temp/tempscripts/{video:04}.json"
+        filename = f"workspace/v5/temp/tempscripts/{video:04}.json"
         with open(filename, 'w') as f:
             json.dump(video_data, f, indent=4)
         print(f"Saved {video} data to {filename}")
 
 def makeBG():
-    directory = "workspace/bg-mirror"
+    # Parameters
+    directory = "workspace/v5/bg-mirror"
     files = os.listdir(directory)
     bg_vids = []
     combined_length = 0
+
     while combined_length < 60:
         file = random.choice(files)
         print(file)
         bg_vids.append(file)
         print(bg_vids)
-        file_length = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
-                             "format=duration", "-of",
-                             "default=noprint_wrappers=1:nokey=1", f"{directory}/{file}"],
+        file_length = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", f"workspace/v5/bg-mirror/{file}"],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
+        print(file_length.stdout)
         combined_length += float(file_length.stdout)
         print(combined_length)
     # create a filelist.txt with the bg_vids
-    with open("workspace/filelist.txt", "w") as f:
+    with open("workspace/v5/temp/filelist.txt", "w") as f:
         for file in bg_vids:
-            print(f"file '{file}'\n")
-            f.write(f"file 'bg-mirror/{file}'\n")
+            print(f"file '../bg-mirror/{file}'\n")
+            f.write(f"file '../bg-mirror/{file}'\n")
     # Use ffmpeg to combine the videos in bg_vids
-    subprocess.run(["ffmpeg", "-f", "concat", "-safe", "0", "-i", "/media/OS/Users/Mohid/tt-ai/workspace/filelist.txt", "-c", "copy", "workspace/temp/background.mp4"])
+    subprocess.run(["ffmpeg", "-f", "concat", "-safe", "0", "-i", "workspace/v5/temp/filelist.txt", "-c", "copy", "workspace/v5/output/background.mp4"])
     # os.remove("workspace/temp/filelist.txt")
+
+def text_to_speech(text):
+    body = {"voice": "Brian", "text": text, "service": "StreamElements"}
+    response = requests.post(
+        "https://lazypy.ro/tts/request_tts.php", data=body)
+    print(response.status_code)
+    voice_data = requests.get(response.json()["audio_url"])
+    with open("workspace/v5/temp/voicedata.mp3", "wb") as f:
+        f.write(voice_data.content)
+
+def transcibeTTS():
+    # Parameters
+    device = "cuda"
+    audio_file = "workspace/v5/temp/voicedata.mp3"
+    batch_size = 16 # reduce if low on GPU mem
+    compute_type = "float16" # change to "int8" if low on GPU mem (may reduce accuracy)
+    align_model = "WAV2VEC2_ASR_BASE_960H"
+    model_a, metadata = whisperx.load_align_model(language_code='en', device=device, model_name=align_model)
+
+    
+    if not audio_file:
+        raise ValueError("No audio file found. Please run text_to_speech() first.")
+    model = whisperx.load_model("large-v2", device, compute_type=compute_type)
+    audio = whisperx.load_audio(audio_file)
+    result = model.transcribe(audio, batch_size, language='en')
+    print(result)
+
+transcibeTTS()
