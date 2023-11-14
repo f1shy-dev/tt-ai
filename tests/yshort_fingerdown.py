@@ -154,7 +154,7 @@ def text_to_speech(text):
     with open("workspace/v5/temp/voicedata.mp3", "wb") as f:
         f.write(voice_data.content)
 
-def transcibeTTS():
+def transcribeTTS():
     # Parameters
     device = "cuda"
     audio_file = "workspace/v5/temp/voicedata.mp3"
@@ -163,12 +163,46 @@ def transcibeTTS():
     align_model = "WAV2VEC2_ASR_BASE_960H"
     model_a, metadata = whisperx.load_align_model(language_code='en', device=device, model_name=align_model)
 
-    
     if not audio_file:
         raise ValueError("No audio file found. Please run text_to_speech() first.")
+    
+    # Transcribe
     model = whisperx.load_model("large-v2", device, compute_type=compute_type)
-    audio = whisperx.load_audio(audio_file)
-    result = model.transcribe(audio, batch_size, language='en')
-    print(result)
 
-transcibeTTS()
+    # Do something cool
+    audio = whisperx.load_audio(audio_file)
+    result = model.transcribe(audio, batch_size=batch_size)
+    
+    # Alignmentation
+    model_a, metadata = whisperx.load_align_model(language_code=result["language"], device=device)
+    result = whisperx.align(result["segments"], model_a, metadata, audio, device, return_char_alignments=False)
+
+    print(result["segments"]) # Print.
+
+    # Store the thing in the other thing
+    # store the result in the json file with nice formatting
+    with open("workspace/v5/temp/voicedata.json", "w") as f:
+        json.dump(result["segments"], f, indent=4)
+    # omg finallyyy its done
+
+def burnSubs():
+    # 1. Load the json file
+    # 2. split the sentences into 20 character chunks (or less) and add them to a list
+    # 3. Burn the subs to the video using the format: (font_size=18,color='00FFFF',underline=False,Fontname='Dela Gothic One',BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='18', Alignment='5',MarginL='10',MarginR='10',MarginV='10')
+    # 4. Save the video to output
+    # 1
+    with open("workspace/v5/temp/voicedata.json", "r") as f:
+        voicedata = json.load(f)
+    # 2. split the sentences into 20 character chunks (or less) and add them to a list
+    chunks = []
+    for segment in voicedata:
+        for word in segment["words"]:
+            while len(word) > 20:
+                chunks.append(word[:20])
+                word = word[20:]
+            chunks.append(word)
+    print(chunks)
+            
+
+
+burnSubs()
