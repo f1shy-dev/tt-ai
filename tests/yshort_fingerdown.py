@@ -1,6 +1,6 @@
 import datetime
 import ffmpeg
-import whisperx
+# import whisperx
 # from ttai_farm.v4.write_ass import write_adv_substation_alpha
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCompleteColumn
 from rich.prompt import Confirm
@@ -142,16 +142,16 @@ def makeBG():
             print(f"file '../bg/{file}'\n")
             f.write(f"file '../bg/{file}'\n")
     # Use ffmpeg to combine the videos in bg_vids
-    subprocess.run(["ffmpeg", "-f", "concat", "-safe", "0", "-i", "workspace/v5/temp/filelist.txt", "-c", "copy", "workspace/v5/output/background.mp4"])
+    subprocess.run(["ffmpeg", "-f", "concat", "-safe", "0", "-i", "workspace/v5/temp/filelist.txt", "-c", "copy", "workspace/v5/temp/background.mp4"])
     # os.remove("workspace/temp/filelist.txt")
 
-def text_to_speech(text):
+def text_to_speech(text, file_path="workspace/v5/temp/voicedata.mp3"):
     body = {"voice": "Brian", "text": text, "service": "StreamElements"}
     response = requests.post(
         "https://lazypy.ro/tts/request_tts.php", data=body)
     print(response.status_code)
     voice_data = requests.get(response.json()["audio_url"])
-    with open("workspace/v5/temp/voicedata.mp3", "wb") as f:
+    with open(file_path, "wb") as f:
         f.write(voice_data.content)
 
 def transcribeTTS():
@@ -180,29 +180,188 @@ def transcribeTTS():
     print(result["segments"]) # Print.
 
     # Store the thing in the other thing
-    # store the result in the json file with nice formatting
+    jsondata = json.dumps(result["segments"], indent=4)
     with open("workspace/v5/temp/voicedata.json", "w") as f:
-        json.dump(result["segments"], f, indent=4)
-    # omg finallyyy its done
+        f.write(jsondata)
+    # yay its done
 
-def burnSubs():
-    # 1. Load the json file
-    # 2. split the sentences into 20 character chunks (or less) and add them to a list
-    # 3. Burn the subs to the video using the format: (font_size=18,color='00FFFF',underline=False,Fontname='Dela Gothic One',BackColor='&H80000000', Spacing='0.2', Outline='0', Shadow='0.75', Fontsize='18', Alignment='5',MarginL='10',MarginR='10',MarginV='10')
-    # 4. Save the video to output
-    # 1
+def chunkSubs():
+    # Parameters
+    chunk_length = 20
+    # WHYS THE JSON BROKEN NOW
+    with open("workspace/v5/temp/voicedata.json", "r") as f:
+        jsondata = json.load(f)
+        for sentence in jsondata:
+            for word in sentence["words"]:
+                index = sentence["words"].index(word) # wth is this code
+                if 'start' not in word:
+                    if index == 0:
+                        word["start"] = sentence["start"]
+                        print(f'Number detected - start time assigned to sentence start time', {word["word"]})
+                    else:
+                        word["start"] = sentence["words"][index-1]["end"]
+                        print(f'Number detected - start time assigned to previous word end time', {word["word"]})
+                    if index == len(sentence["words"])-1:
+                        # if a number is the last word in a sentence, we need to run the text to speech function on just that word, then assign the end time to the start time + length of the output from the text to speech function
+                        text_to_speech(word["word"], "workspace/v5/temp/temp-number.mp3")
+                        length = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", "workspace/v5/temp/temp-number.mp3"],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+                        length = float(length.stdout)
+                        word["end"] = sentence["start"] + length
+                        print(f'Number detected - end time assigned using magic.', word["word"])
+                    else:
+                        word["end"] = sentence["words"][index+1]["start"] # 3d arrays omgggg
+                        print(f'Number detected - end time assigned to next word start time', word["word"])
+        print('JSON data is good.')
+    with open("workspace/v5/temp/voicedata.json", "w") as f:
+        json.dump(jsondata, f, indent=4)
+
+    # FINALLY WE CAN DO THE THING
     with open("workspace/v5/temp/voicedata.json", "r") as f:
         voicedata = json.load(f)
-    # 2. split the sentences into 20 character chunks (or less) and add them to a list
     chunks = []
-    for segment in voicedata:
-        for word in segment["words"]:
-            while len(word) > 20:
-                chunks.append(word[:20])
-                word = word[20:]
-            chunks.append(word)
-    print(chunks)
-            
+    script = ""
+    for sentence in voicedata:
+        sentencetemp = ""
+        for word in sentence["words"]:
+            sentencetemp += word["word"] + " "
+        script += sentencetemp
+    print(script)
+    chunk = ""
+    for word in script.split():
+        if len(chunk) + len(word) <= chunk_length:
+            chunk += word + " "
+        else:
+            chunks.append(chunk)
+            chunk = ""
+            chunk += word + " "
+    chunks.append(chunk)
+
+    chunks_json = {}
+    for chunk in chunks:
+        chunks_json[chunk] = {}
+        chunks_json[chunk]["words"] = []
+        for word in chunk.split():
+            chunks_json[chunk]["words"].append(word)
+
+    chunks = json.dumps(chunks_json, indent=2)
+    chunks_json = json.loads(chunks)
+
+    # NOW WE NEED TO ADD THE TIMINGS AHHHHH
+    # BUN THIS STUPID CODE
+    print(type(chunks_json))
+    for chunk in chunks_json:
+        chunk_json = chunks_json[chunk]
+        print(type(chunk_json))
+        for word in chunk_json["words"]:
+            index = chunk_json["words"].index(word)
+            with open("workspace/v5/temp/voicedata.json", "r") as f:
+                voicedata_list = json.load(f)
+                voicedata = voicedata_list[0]
+                for sentence in voicedata_list:
+                    for sentenceword in sentence["words"]:
+                        if sentenceword["word"] == chunk_json["words"][index]:
+                            wordStart = sentenceword["start"]
+                            wordEnd = sentenceword["end"]
+                            print(wordStart)
+                            print(wordEnd)
+                            chunk_json["words"][index] = {'start': wordStart, 'end': wordEnd, 'word': word}
+        chunk_json = chunks_json[chunk]
+        chunk_json["start"] = chunk_json["words"][0]["start"]
+        chunk_json["end"] = chunk_json["words"][-1]["end"]
+        print(chunk_json["start"])
+        print(chunk_json["end"])
+                    
+    print('JSON data is all good.')
+    with open("workspace/v5/temp/chunks.json", "w") as f:
+        json.dump(chunks_json, f, indent=4)
+    print('JSON data saved.')
+
+# Function to format time in HH:MM:SS.mmm format
+def format_time(seconds):
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    return f"{int(hours):02d}:{int(minutes):02d}:{seconds:.3f}"
+
+def generate_subtitle_file():
+    json_file_path = 'workspace/v5/temp/chunks.json'
+    with open(json_file_path, 'r', encoding='utf-8') as json_file:
+        json_data = json.load(json_file)
+    
+    output_file = 'workspace/v5/temp/subtitles.ass'
+
+    with open(output_file, 'w', encoding='utf-8') as subtitle_file:
+        # Write subtitle file header
+        subtitle_file.write('[Script Info]\n')
+        subtitle_file.write('ScriptType: v4.00+\n\n')
+
+        subtitle_file.write('[Events]\n')
+        subtitle_file.write('Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n')
+
+        # Iterate through each text block in the JSON data
+        for text_block, data in json_data.items():
+            start_time = data['start']
+            end_time = data['end']
+
+            # Iterate through each word in the text block
+            for word_data in data['words']:
+                word_start = word_data['start']
+                word_end = word_data['end']
+                word_text = word_data['word']
+
+                word_start_time = start_time + word_start
+                word_end_time = start_time + word_end
+                word_start_time = format_time(word_start_time)
+                word_end_time = format_time(word_end_time)
 
 
-burnSubs()
+                # Write word-level entry to subtitle file
+                subtitle_file.write(
+                    'Dialogue: 0,{},{},Default,,0,0,0,,{}\n'.format(
+                        word_start_time, word_end_time, word_text
+                    )
+                )
+
+    print(f'Subtitle file "{output_file}" has been generated successfully.')
+
+def burn_subtitles():
+    input_video_path = 'workspace/v5/temp/background.mp4'
+    subtitle_file_path = 'workspace/v5/temp/subtitles.ass'
+    audio_file_path = 'workspace/v5/temp/voicedata.mp3'
+    output_video_path = 'workspace/v5/temp/background_subbed.mp4'
+    cmd = [
+        'ffmpeg',
+        '-i', input_video_path,
+        '-i', audio_file_path,  # Add this line to specify the input audio file
+        '-vf', f'ass={subtitle_file_path}',
+        '-c:a', 'aac',  # Change 'copy' to 'aac' to include audio codec for MP4
+        '-strict', 'experimental',  # Needed for using 'aac' codec
+        output_video_path
+    ]
+
+    subprocess.run(cmd)
+
+def combine_audio_video():
+    audio_path = 'workspace/v5/temp/voicedata.mp3'
+    video_path = 'workspace/v5/temp/background_subbed.mp4'
+    output_path = 'workspace/v5/output/output.mp4'
+
+    # ffmpeg command to combine audio and video
+    command = [
+        'ffmpeg',
+        '-i', video_path,
+        '-i', audio_path,
+        '-c:v', 'copy',
+        '-c:a', 'aac',
+        '-strict', 'experimental',
+        '-map', '0:v:0',
+        '-map', '1:a:0',
+        '-shortest',  # Ensure that the output is at least as long as the input audio
+        output_path
+    ]
+
+    # Run the subprocess command
+    subprocess.run(command)
+
+burn_subtitles()
