@@ -250,13 +250,13 @@ def chunkSubs():
 
     # NOW WE NEED TO ADD THE TIMINGS AHHHHH
     # BUN THIS STUPID CODE
-    print(type(chunks_json))
-    for chunk in chunks_json:
-        chunk_json = chunks_json[chunk]
-        print(type(chunk_json))
-        for word in chunk_json["words"]:
-            index = chunk_json["words"].index(word)
-            with open("workspace/v5/temp/voicedata.json", "r") as f:
+    with open("workspace/v5/temp/voicedata.json", "r") as f:
+        print(type(chunks_json))
+        for chunk in chunks_json:
+            chunk_json = chunks_json[chunk]
+            print(type(chunk_json))
+            for word in chunk_json["words"]:
+                index = chunk_json["words"].index(word)
                 voicedata_list = json.load(f)
                 voicedata = voicedata_list[0]
                 for sentence in voicedata_list:
@@ -282,7 +282,7 @@ def chunkSubs():
 def format_time(seconds):
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
-    return f"{int(hours):02d}:{int(minutes):02d}:{seconds:.3f}"
+    return f"{int(hours):02d}:{int(minutes):02d}:{seconds:06.3f}"
 
 def generate_subtitle_file():
     json_file_path = 'workspace/v5/temp/chunks.json'
@@ -328,33 +328,33 @@ def generate_subtitle_file():
 def burn_subtitles():
     input_video_path = 'workspace/v5/temp/background.mp4'
     subtitle_file_path = 'workspace/v5/temp/subtitles.ass'
-    audio_file_path = 'workspace/v5/temp/voicedata.mp3'
     output_video_path = 'workspace/v5/temp/background_subbed.mp4'
     cmd = [
-        'ffmpeg',
+        'ffmpeg', '-y',
+        '-hwaccel', 'cuda',
         '-i', input_video_path,
-        '-i', audio_file_path,  # Add this line to specify the input audio file
         '-vf', f'ass={subtitle_file_path}',
-        '-c:a', 'aac',  # Change 'copy' to 'aac' to include audio codec for MP4
-        '-strict', 'experimental',  # Needed for using 'aac' codec
+        '-an',
         output_video_path
     ]
+    
 
     subprocess.run(cmd)
 
+    # cmd = 
+
 def combine_audio_video():
     audio_path = 'workspace/v5/temp/voicedata.mp3'
-    video_path = 'workspace/v5/temp/background_subbed.mp4'
+    video_path = 'workspace/v5/temp/background_subbed.mp4' # yo
     output_path = 'workspace/v5/output/output.mp4'
 
     # ffmpeg command to combine audio and video
     command = [
-        'ffmpeg',
+        'ffmpeg', '-y',
         '-i', video_path,
         '-i', audio_path,
         '-c:v', 'copy',
         '-c:a', 'aac',
-        '-strict', 'experimental',
         '-map', '0:v:0',
         '-map', '1:a:0',
         '-shortest',  # Ensure that the output is at least as long as the input audio
@@ -362,6 +362,8 @@ def combine_audio_video():
     ]
 
     # Run the subprocess command
-    subprocess.run(command)
-
+    subprocess.run(command
+                   )
+# generate_subtitle_file()
 burn_subtitles()
+combine_audio_video()
