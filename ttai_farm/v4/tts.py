@@ -6,8 +6,8 @@ from mutagen.mp3 import MP3
 # Fuction for Converting Text To Speech using SteamLabsPolly API (Voice is Set to 'Matthew')
 
 
-def text_to_speach(text, filepath):
-    body = {"voice": "en-US-Standard-D", "text": text, "service": "StreamElements"}
+def text_to_speech(text, filepath):
+    body = {"voice": "Brian", "text": text, "service": "StreamElements"}
     response = requests.post(
         "https://lazypy.ro/tts/request_tts.php", data=body)
     # print(response.json())

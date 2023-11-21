@@ -1,3 +1,35 @@
+<<<<<<< HEAD
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ttai_farm"
+version = "2.0.12"
+description = "Automatically clip and subtitle videos using AI."
+dependencies = [
+    "openai-whisper",
+    "yt-dlp",
+    "ffmpeg",
+    "openai",
+    # "torch",
+    "requests",
+    "python-dotenv",
+    "tiktoken",
+    "rich",
+    "poe-api-wrapper",
+    # "git+https://github.com/kokarare1212/librespot-python",
+    "librespot@git+https://github.com/kokarare1212/librespot-python",
+]
+
+
+[project.scripts]
+farmcli = "ttai_farm.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ttai_farm"]
+=======
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
@@ -29,3 +61,4 @@ farmcli = "ttai_farm.cli:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["ttai_farm"]
+>>>>>>> 9158c539ea44c648cdd581c047eda4ed6543f517
